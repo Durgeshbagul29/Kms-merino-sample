@@ -1,0 +1,4293 @@
+{
+  "info": {
+    "_postman_id": "da61ec73-b8e3-4d3a-8dd2-4667eb4a816b",
+    "name": "KMS (Kaizen Management System) API",
+    "description": "Complete Postman API Collection for Kaizen Management System (KMS).\nIncludes Authentication, User, HR, Admin, Manager, and Director operations.\nFeatures pre-configured bearer token propagation, sample payloads, and Super Admin limitations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "01. Authentication & Profile",
+      "description": "Authentication, device token registration, departments, and profile endpoints",
+      "item": [
+        {
+          "name": "User Login (Auto-captures Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Authenticates any active user (Admin, HR, User, Director, Manager). Automatically stores token in collection variable 'token'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    pm.environment.set('token', jsonData.data.token);",
+                  "    console.log('Bearer token auto-saved: ' + jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/get_profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "get_profile"
+              ]
+            },
+            "description": "Get logged-in user profile details"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/get_depts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "get_depts"
+              ]
+            },
+            "description": "List all departments"
+          },
+          "response": []
+        },
+        {
+          "name": "Register FCM Device Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/register_device_token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register_device_token"
+              ]
+            },
+            "description": "Registers device token for push notifications",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"device_token\": \"sample_fcm_token_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove FCM Device Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/remove_device_token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "remove_device_token"
+              ]
+            },
+            "description": "Removes device token on logout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"device_token\": \"sample_fcm_token_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "logout"
+              ]
+            },
+            "description": "Revokes active API passport token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. User Operations",
+      "description": "Standard User endpoints for Kaizens, Safety reporting, Complaints, and Notifications",
+      "item": [
+        {
+          "name": "User Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/user_dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "user_dashboard"
+              ]
+            },
+            "description": "Overview metrics for standard user"
+          },
+          "response": []
+        },
+        {
+          "name": "Kaizens",
+          "item": [
+            {
+              "name": "View Kaizens by Type",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_kaizens/:type",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_kaizens",
+                    ":type"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "Cost Savings",
+                      "description": "Category: Cost Savings, Productivity, Quality, Safety, 5S"
+                    }
+                  ]
+                },
+                "description": "List submitted kaizens by subcategory type"
+              },
+              "response": []
+            },
+            {
+              "name": "View Approved Kaizens",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_approvedkaizens",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_approvedkaizens"
+                  ]
+                },
+                "description": "List approved kaizens for user"
+              },
+              "response": []
+            },
+            {
+              "name": "View Submitted Kaizens",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_submittedkaizens",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_submittedkaizens"
+                  ]
+                },
+                "description": "List all submitted kaizens for user"
+              },
+              "response": []
+            },
+            {
+              "name": "View Kaizen Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_kaizens_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_kaizens_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1",
+                      "description": "Kaizen ID"
+                    }
+                  ]
+                },
+                "description": "View complete details of a single kaizen"
+              },
+              "response": []
+            },
+            {
+              "name": "Check Kaizen Duplicate (AI)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/check_kaizen_duplicate",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "check_kaizen_duplicate"
+                  ]
+                },
+                "description": "Checks semantic similarity against existing kaizens using Gemini AI",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"problem\": \"Manual entry of paper inspection sheets causes delay\",\n  \"description\": \"Operators take 30 minutes daily to write logs\",\n  \"solution\": \"Implement automated barcode scanning\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Submit New Kaizen",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/add_kaizen_record",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "add_kaizen_record"
+                  ]
+                },
+                "description": "Submit a new Kaizen (enforces max_kaizens_per_user_per_month limit)",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "type",
+                      "type": "text",
+                      "value": "Productivity",
+                      "description": "Subcategory name"
+                    },
+                    {
+                      "key": "problem",
+                      "type": "text",
+                      "value": "High conveyor motor temperature during peak shifts causing downtime"
+                    },
+                    {
+                      "key": "description",
+                      "type": "text",
+                      "value": "Conveyor 3 motor reaches over 85 degrees C every afternoon"
+                    },
+                    {
+                      "key": "solution",
+                      "type": "text",
+                      "value": "Install cooling fan and airflow redirection shroud"
+                    },
+                    {
+                      "key": "cost_savings",
+                      "type": "text",
+                      "value": "25000",
+                      "description": "Estimated cost savings in INR"
+                    },
+                    {
+                      "key": "support",
+                      "type": "text",
+                      "value": "self",
+                      "description": "self or support"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": [],
+                      "description": "Before image (jpg, png)"
+                    },
+                    {
+                      "key": "before_video",
+                      "type": "file",
+                      "src": [],
+                      "description": "Before video (mp4, webm)"
+                    },
+                    {
+                      "key": "force_submit",
+                      "type": "text",
+                      "value": "false",
+                      "description": "Set to true to bypass AI duplicate warning"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Approved Kaizen (Implementation)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/update_approved_kaizen",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "update_approved_kaizen"
+                  ]
+                },
+                "description": "Update an approved kaizen with post-implementation proof",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "id",
+                      "type": "text",
+                      "value": "1",
+                      "description": "Kaizen ID"
+                    },
+                    {
+                      "key": "improvement",
+                      "type": "text",
+                      "value": "Installed cooling shroud and temperature reduced by 20C."
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": [],
+                      "description": "After image"
+                    },
+                    {
+                      "key": "after_video",
+                      "type": "file",
+                      "src": [],
+                      "description": "After video"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Pending Kaizen",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/update_pending_kaizen",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "update_pending_kaizen"
+                  ]
+                },
+                "description": "Edit pending kaizen details before approval",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "id",
+                      "type": "text",
+                      "value": "1",
+                      "description": "Kaizen ID"
+                    },
+                    {
+                      "key": "problem",
+                      "type": "text",
+                      "value": "Updated problem description"
+                    },
+                    {
+                      "key": "description",
+                      "type": "text",
+                      "value": "Updated detailed description"
+                    },
+                    {
+                      "key": "solution",
+                      "type": "text",
+                      "value": "Updated proposed solution"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": [],
+                      "description": "New before image"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Kaizen",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/delete_user_kaizen",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "delete_user_kaizen"
+                  ]
+                },
+                "description": "Delete a user-owned kaizen",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Download Kaizen PDF",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/download_kaizen_pdf/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "download_kaizen_pdf",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1",
+                      "description": "Kaizen ID"
+                    }
+                  ]
+                },
+                "description": "Download generated PDF report for a kaizen"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Safety (Accident, Near-miss, Observation)",
+          "item": [
+            {
+              "name": "View Accident Reports",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_accidents",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_accidents"
+                  ]
+                },
+                "description": "List user accident reports"
+              },
+              "response": []
+            },
+            {
+              "name": "View Accident Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_accident_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_accident_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Accident incident details"
+              },
+              "response": []
+            },
+            {
+              "name": "Submit Accident Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/add_accident_record",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "add_accident_record"
+                  ]
+                },
+                "description": "Submit accident record (enforces max_accidents_per_user_per_month limit)",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "incident",
+                      "type": "text",
+                      "value": "Minor hand cut while handling metal sheet"
+                    },
+                    {
+                      "key": "analysis",
+                      "type": "text",
+                      "value": "Sharp burrs on sheet edge, operator was not wearing cut-resistant gloves"
+                    },
+                    {
+                      "key": "action",
+                      "type": "text",
+                      "value": "First aid administered, mandatory cut-level 5 gloves enforced"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "View Near-miss Reports",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_nearmiss",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_nearmiss"
+                  ]
+                },
+                "description": "List user near-miss reports"
+              },
+              "response": []
+            },
+            {
+              "name": "View Near-miss Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_nearmiss_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_nearmiss_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Near-miss incident details"
+              },
+              "response": []
+            },
+            {
+              "name": "Submit Near-miss Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/add_nearmiss_record",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "add_nearmiss_record"
+                  ]
+                },
+                "description": "Submit near-miss report (enforces max_nearmiss_per_user_per_month limit)",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "incident",
+                      "type": "text",
+                      "value": "Forklift turned corner quickly without honking near pedestrian walkway"
+                    },
+                    {
+                      "key": "action",
+                      "type": "text",
+                      "value": "Installed convex mirror at blind turn and reminded forklift driver"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "View Observation Reports",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_observation",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_observation"
+                  ]
+                },
+                "description": "List safety observations"
+              },
+              "response": []
+            },
+            {
+              "name": "View Observation Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_obs_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_obs_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Observation details"
+              },
+              "response": []
+            },
+            {
+              "name": "Submit Observation Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/add_observation_record",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "add_observation_record"
+                  ]
+                },
+                "description": "Submit safety observation (enforces max_observations_per_user_per_month limit)",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "observation",
+                      "type": "text",
+                      "value": "Water leak on walkway near pump station creates slipping hazard"
+                    },
+                    {
+                      "key": "action",
+                      "type": "text",
+                      "value": "Placed cautionary cone and notified maintenance team"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Ethics & Complaints",
+          "item": [
+            {
+              "name": "View User Complaints",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_complaints",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_complaints"
+                  ]
+                },
+                "description": "List ethics complaints filed by current user"
+              },
+              "response": []
+            },
+            {
+              "name": "Submit Ethics Complaint",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/add_user_complaint",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "add_user_complaint"
+                  ]
+                },
+                "description": "File confidential ethics complaint (enforces max_complaints_per_user_per_month limit)",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"complaint\": \"Discourteous behavior witnessed in canteen regarding overtime allocation.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Notifications & Broadcasts",
+          "item": [
+            {
+              "name": "View User Notifications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_notifications",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_notifications"
+                  ]
+                },
+                "description": "List system section notifications"
+              },
+              "response": []
+            },
+            {
+              "name": "View Section Notification Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_section_notf/:notf_id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_section_notf",
+                    ":notf_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "notf_id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Notification details"
+              },
+              "response": []
+            },
+            {
+              "name": "Mark Section Notification Reviewed",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/review_user_section_notf/:notf_id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "review_user_section_notf",
+                    ":notf_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "notf_id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Marks section notification as seen"
+              },
+              "response": []
+            },
+            {
+              "name": "View Broadcast Notifications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_user_broadcast",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_user_broadcast"
+                  ]
+                },
+                "description": "List system broadcast announcements"
+              },
+              "response": []
+            },
+            {
+              "name": "Mark Broadcast Seen",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/seen_user_broadcast_notf/:notf_id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "seen_user_broadcast_notf",
+                    ":notf_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "notf_id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Mark broadcast announcement as seen"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete User Notification",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/delete_user_notf",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "delete_user_notf"
+                  ]
+                },
+                "description": "Dismiss a user notification",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notf_id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03. HR Operations (Role 2)",
+      "description": "User administration, role management, and department assignments",
+      "item": [
+        {
+          "name": "HR Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hr_dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hr_dashboard"
+              ]
+            },
+            "description": "HR Dashboard stats (respects hide_managers & hide_directors)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/get_all_users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "get_all_users"
+              ]
+            },
+            "description": "List all standard users (role 3)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Admins",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/get_all_admins",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "get_all_admins"
+              ]
+            },
+            "description": "List all admin accounts (role 1)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Directors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/get_all_directors",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "get_all_directors"
+              ]
+            },
+            "description": "List directors (blocked if hide_directors is enabled)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Managers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/get_all_managers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "get_all_managers"
+              ]
+            },
+            "description": "List managers with assigned depts (blocked if hide_managers is enabled)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/get_all_departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "get_all_departments"
+              ]
+            },
+            "description": "List all system departments"
+          },
+          "response": []
+        },
+        {
+          "name": "View User Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_user_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_user_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "View full account profile of any employee"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User, Admin, or Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/add_new_useroradmin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "add_new_useroradmin"
+              ]
+            },
+            "description": "Creates User, Admin, or Manager (enforces max_users, max_admins, max_managers, and hide_managers)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"EMP1099\",\n  \"empname\": \"Rohan Deshmukh\",\n  \"email\": \"rohan.d@example.com\",\n  \"mobile\": \"9876543210\",\n  \"password\": \"Password123\",\n  \"cpassword\": \"Password123\",\n  \"user\": \"User\",\n  \"department_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Director",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/add_director",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "add_director"
+              ]
+            },
+            "description": "Creates Director account (enforces max_directors and hide_directors)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"DIR101\",\n  \"empname\": \"Dr. V. K. Sharma\",\n  \"email\": \"vk.sharma@example.com\",\n  \"mobile\": \"9812345678\",\n  \"password\": \"Password123\",\n  \"cpassword\": \"Password123\",\n  \"department_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User or Admin Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/update_useroradmin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "update_useroradmin"
+              ]
+            },
+            "description": "Updates employee account information",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"username\": \"EMP1099\",\n  \"empname\": \"Rohan Deshmukh\",\n  \"email\": \"rohan.new@example.com\",\n  \"mobile\": \"9876543210\",\n  \"department_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change User Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/change_password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "change_password"
+              ]
+            },
+            "description": "HR password reset for any user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"password\": \"NewSecretPassword123\",\n  \"cpassword\": \"NewSecretPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Manager Departments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assign_manager_departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assign_manager_departments"
+              ]
+            },
+            "description": "Assign departments to a manager (blocked if hide_managers is enabled)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5,\n  \"departments\": [\n    1,\n    2,\n    3\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04. Admin Operations (Role 1)",
+      "description": "Departmental Administration, Approvals, Excel Analytics, and Broadcasts",
+      "item": [
+        {
+          "name": "Admin Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin_dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin_dashboard"
+              ]
+            },
+            "description": "Administrator overview metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "Admin My Team",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin_my_team",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin_my_team"
+              ]
+            },
+            "description": "List members in admin department"
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Kaizen KPI Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin_kaizen_kpi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin_kaizen_kpi"
+              ]
+            },
+            "description": "Overall KPI metrics & Mean Time To Implement"
+          },
+          "response": []
+        },
+        {
+          "name": "Kaizens Management",
+          "item": [
+            {
+              "name": "View All Kaizens",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_allkaizens",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_allkaizens"
+                  ]
+                },
+                "description": "List kaizens for admin department"
+              },
+              "response": []
+            },
+            {
+              "name": "View Kaizens by Type",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_kaizentype/:type",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_kaizentype",
+                    ":type"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "Productivity"
+                    }
+                  ]
+                },
+                "description": "Filter departmental kaizens by category"
+              },
+              "response": []
+            },
+            {
+              "name": "View Kaizen Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_kaizen_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_kaizen_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Detailed review page for a Kaizen"
+              },
+              "response": []
+            },
+            {
+              "name": "Approve / Reject / Verify Kaizen",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/update_admin_kaizen",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "update_admin_kaizen"
+                  ]
+                },
+                "description": "Update Kaizen status: 'approve', 'reject', or 'verify'",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"k_id\": 1,\n  \"admin_id\": 1,\n  \"update_status\": \"approve\",\n  \"comment\": \"Good initiative, approved for trial implementation\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Kaizen Date-range Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_kaizen_report",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_kaizen_report"
+                  ]
+                },
+                "description": "Filter departmental kaizens by date range and status (0:pending, 1:approved, 2:all, 3:verified)",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"kstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Export Kaizen to Excel",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_kaizen_excel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_kaizen_excel"
+                  ]
+                },
+                "description": "Generates Excel spreadsheet archive for Kaizens",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"kstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Kaizen Excel Download URL",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_downloadurl_kaizenexcel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_downloadurl_kaizenexcel"
+                  ]
+                },
+                "description": "Retrieves pre-signed/direct download link for exported excel",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Kaizen Archive Files",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/kaizen_archive_files",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "kaizen_archive_files"
+                  ]
+                },
+                "description": "List generated Kaizen Excel archives"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Safety Review & Exports",
+          "item": [
+            {
+              "name": "View Accident Incidents",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_accident",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_accident"
+                  ]
+                },
+                "description": "Departmental accidents"
+              },
+              "response": []
+            },
+            {
+              "name": "View Accident Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_accident_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_accident_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Accident review details"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Accident Status",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/update_admin_accident",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "update_admin_accident"
+                  ]
+                },
+                "description": "Close or update an accident report",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"admin_id\": 1,\n  \"comment\": \"Corrective action verified and preventive guard installed\",\n  \"status\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Accident Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_accident_report",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_accident_report"
+                  ]
+                },
+                "description": "Date-filtered accident report",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"acstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Export Accident Excel",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_accident_excel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_accident_excel"
+                  ]
+                },
+                "description": "Generates accident Excel sheet",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"acstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Accident Archive Files",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/accident_archive_files",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "accident_archive_files"
+                  ]
+                },
+                "description": "List archived accident excels"
+              },
+              "response": []
+            },
+            {
+              "name": "Download Accident File",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/download_accident_file/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "download_accident_file",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Download accident file"
+              },
+              "response": []
+            },
+            {
+              "name": "View Near-miss Incidents",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_nearmiss",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_nearmiss"
+                  ]
+                },
+                "description": "Departmental near-misses"
+              },
+              "response": []
+            },
+            {
+              "name": "View Near-miss Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_nearmiss_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_nearmiss_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Near-miss review details"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Near-miss Status",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/update_admin_nearmiss",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "update_admin_nearmiss"
+                  ]
+                },
+                "description": "Close or update near-miss",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"admin_id\": 1,\n  \"comment\": \"Hazard eliminated\",\n  \"status\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Near-miss Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_nearmiss_report",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_nearmiss_report"
+                  ]
+                },
+                "description": "Date-filtered near-miss report",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"nmstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Export Near-miss Excel",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_nearmiss_excel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_nearmiss_excel"
+                  ]
+                },
+                "description": "Generates near-miss Excel file",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"nmstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Near-miss Archive Files",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/nearmiss_archive_files",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "nearmiss_archive_files"
+                  ]
+                },
+                "description": "List archived near-miss excels"
+              },
+              "response": []
+            },
+            {
+              "name": "View Observations",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_observation",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_observation"
+                  ]
+                },
+                "description": "Departmental safety observations"
+              },
+              "response": []
+            },
+            {
+              "name": "View Observation Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_observation_details/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_observation_details",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Observation review details"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Observation Status",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/update_admin_observation",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "update_admin_observation"
+                  ]
+                },
+                "description": "Close or update safety observation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"admin_id\": 1,\n  \"comment\": \"Workplace standard updated\",\n  \"status\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Observation Report",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_obs_report",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_obs_report"
+                  ]
+                },
+                "description": "Date-filtered observation report",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"obsstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Export Observation Excel",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_observation_excel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_observation_excel"
+                  ]
+                },
+                "description": "Generates observation Excel sheet",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"obsstatus\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Observation Archive Files",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/observation_archive_files",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "observation_archive_files"
+                  ]
+                },
+                "description": "List archived observation excels"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Ethics & Governance",
+          "item": [
+            {
+              "name": "View Ethics Complaints",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_ethics",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_ethics"
+                  ]
+                },
+                "description": "Departmental ethics complaints"
+              },
+              "response": []
+            },
+            {
+              "name": "Review Complaint Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/review_admin_complaint/:admin_id/:complaint_id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "review_admin_complaint",
+                    ":admin_id",
+                    ":complaint_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "admin_id",
+                      "value": "1"
+                    },
+                    {
+                      "key": "complaint_id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Mark complaint reviewed and view full details"
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Ethics Table",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_ethics_table",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_ethics_table"
+                  ]
+                },
+                "description": "Date-filtered complaints report",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"status\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Export Ethics Excel",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin_ethics_excel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "admin_ethics_excel"
+                  ]
+                },
+                "description": "Generates ethics Excel spreadsheet",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admin_id\": 1,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"status\": \"2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Ethics Archive Files",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ethics_archive_files",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "ethics_archive_files"
+                  ]
+                },
+                "description": "List archived ethics excels"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Broadcasts & Archives",
+          "item": [
+            {
+              "name": "View Broadcasts",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_broadcast",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_broadcast"
+                  ]
+                },
+                "description": "List broadcasts created by admin"
+              },
+              "response": []
+            },
+            {
+              "name": "View Broadcast Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_broadcast_details/:notf_id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_broadcast_details",
+                    ":notf_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "notf_id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Single broadcast notification"
+              },
+              "response": []
+            },
+            {
+              "name": "Create Broadcast Notification",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/add_broadcast",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "add_broadcast"
+                  ]
+                },
+                "description": "Broadcast announcement to all users (enforces max_broadcast_notifications limit)",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "admin_id",
+                      "type": "text",
+                      "value": "1"
+                    },
+                    {
+                      "key": "title",
+                      "type": "text",
+                      "value": "Safety Awareness Week Kickoff"
+                    },
+                    {
+                      "key": "message",
+                      "type": "text",
+                      "value": "Please submit your safety observations and Kaizen proposals this week for special recognition."
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Broadcast Notification",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/delete_admin_broadcast",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "delete_admin_broadcast"
+                  ]
+                },
+                "description": "Delete broadcast announcement",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notf_id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "View Admin Kaizen Notifications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/view_admin_kaizen_notf",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "view_admin_kaizen_notf"
+                  ]
+                },
+                "description": "List notifications received by admin"
+              },
+              "response": []
+            },
+            {
+              "name": "Review Kaizen Notification",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/review_admin_kaizen_notf/:admin_id/:notf_id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "review_admin_kaizen_notf",
+                    ":admin_id",
+                    ":notf_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "admin_id",
+                      "value": "1"
+                    },
+                    {
+                      "key": "notf_id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Mark notification seen"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Excel Archive Record",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/delete_downloadurl_excel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "delete_downloadurl_excel"
+                  ]
+                },
+                "description": "Delete generated excel archive record",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Manager Operations (Role 5)",
+      "description": "Cross-departmental management for managers (automatically blocked when hide_managers=1)",
+      "item": [
+        {
+          "name": "Manager Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_dashboard"
+              ]
+            },
+            "description": "Manager team metrics (blocked if hide_managers=1)"
+          },
+          "response": []
+        },
+        {
+          "name": "Manager My Team",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_my_team",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_my_team"
+              ]
+            },
+            "description": "Team members across manager's assigned departments"
+          },
+          "response": []
+        },
+        {
+          "name": "Manager Kaizen KPI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_kaizen_kpi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_kaizen_kpi"
+              ]
+            },
+            "description": "KPI metrics for assigned departments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View All Team Kaizens",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_allkaizens",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_allkaizens"
+              ]
+            },
+            "description": "Team Kaizens across assigned depts"
+          },
+          "response": []
+        },
+        {
+          "name": "View Team Kaizens by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_kaizentype/:type",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_kaizentype",
+                ":type"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "Productivity"
+                }
+              ]
+            },
+            "description": "Filter team kaizens by category"
+          },
+          "response": []
+        },
+        {
+          "name": "View Kaizen Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_kaizen_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_kaizen_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Kaizen details for manager review"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Team Kaizen Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_kaizen_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_kaizen_report"
+              ]
+            },
+            "description": "Date-filtered report for manager's assigned departments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"kstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export Team Kaizen Excel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_kaizen_excel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_kaizen_excel"
+              ]
+            },
+            "description": "Excel export for manager",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"kstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Team Accidents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_accident",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_accident"
+              ]
+            },
+            "description": "Accidents in assigned departments"
+          },
+          "response": []
+        },
+        {
+          "name": "View Accident Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_accident_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_accident_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Accident details"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Team Accident Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_accident_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_accident_report"
+              ]
+            },
+            "description": "Accident analytics for manager",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"acstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Team Near-misses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_nearmiss",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_nearmiss"
+              ]
+            },
+            "description": "Near-misses in assigned departments"
+          },
+          "response": []
+        },
+        {
+          "name": "View Near-miss Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_nearmiss_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_nearmiss_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Near-miss details"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Team Near-miss Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_nearmiss_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_nearmiss_report"
+              ]
+            },
+            "description": "Near-miss analytics for manager",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"nmstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Team Observations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_observation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_observation"
+              ]
+            },
+            "description": "Observations in assigned departments"
+          },
+          "response": []
+        },
+        {
+          "name": "View Observation Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_observation_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_observation_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Observation details"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Team Observation Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_obs_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_obs_report"
+              ]
+            },
+            "description": "Observation analytics for manager",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"obsstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Team Ethics Complaints",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_ethics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_ethics"
+              ]
+            },
+            "description": "Ethics complaints in assigned departments"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Team Ethics Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/manager_ethics_table",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "manager_ethics_table"
+              ]
+            },
+            "description": "Ethics report for manager",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manager_id\": 5,\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"status\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Manager Broadcasts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_broadcast",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_broadcast"
+              ]
+            },
+            "description": "List broadcasts created by manager"
+          },
+          "response": []
+        },
+        {
+          "name": "View Manager Broadcast Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_manager_broadcast_details/:notf_id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_manager_broadcast_details",
+                ":notf_id"
+              ],
+              "variable": [
+                {
+                  "key": "notf_id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Broadcast details"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Manager Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/add_manager_broadcast",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "add_manager_broadcast"
+              ]
+            },
+            "description": "Manager broadcast (enforces max_broadcast_notifications limit)",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "manager_id",
+                  "type": "text",
+                  "value": "5"
+                },
+                {
+                  "key": "title",
+                  "type": "text",
+                  "value": "Team Quarterly Production Target"
+                },
+                {
+                  "key": "message",
+                  "type": "text",
+                  "value": "Great job on exceeding target this month! Keep up the momentum."
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Manager Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/delete_manager_broadcast",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "delete_manager_broadcast"
+              ]
+            },
+            "description": "Delete manager broadcast",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notf_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06. Director Operations (Role 4)",
+      "description": "Executive plant-wide oversight for Directors (automatically blocked when hide_directors=1)",
+      "item": [
+        {
+          "name": "Director Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_dashboard"
+              ]
+            },
+            "description": "Executive high-level dashboard (blocked if hide_directors=1)"
+          },
+          "response": []
+        },
+        {
+          "name": "Director Kaizen KPI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_kaizen_kpi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_kaizen_kpi"
+              ]
+            },
+            "description": "Plant-wide Kaizen KPI summary",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Plant-wide Kaizens",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_allkaizens",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_allkaizens"
+              ]
+            },
+            "description": "View all kaizens across enterprise"
+          },
+          "response": []
+        },
+        {
+          "name": "View Kaizens by Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_kaizentype/:type",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_kaizentype",
+                ":type"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "Productivity"
+                }
+              ]
+            },
+            "description": "Plant-wide kaizens filtered by type"
+          },
+          "response": []
+        },
+        {
+          "name": "View Kaizen Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_kaizen_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_kaizen_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Executive view of single Kaizen"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Plant Kaizen Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_kaizen_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_kaizen_report"
+              ]
+            },
+            "description": "Enterprise Kaizen report",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"kstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export Plant Kaizen Excel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_kaizen_excel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_kaizen_excel"
+              ]
+            },
+            "description": "Executive Kaizen Excel export",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"kstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Plant-wide Accidents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_accident",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_accident"
+              ]
+            },
+            "description": "Enterprise accident log"
+          },
+          "response": []
+        },
+        {
+          "name": "View Accident Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_accident_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_accident_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Accident details"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Plant Accident Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_accident_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_accident_report"
+              ]
+            },
+            "description": "Enterprise accident report",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"acstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Plant-wide Near-misses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_nearmiss",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_nearmiss"
+              ]
+            },
+            "description": "Enterprise near-miss log"
+          },
+          "response": []
+        },
+        {
+          "name": "View Near-miss Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_nearmiss_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_nearmiss_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Near-miss details"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Plant Near-miss Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_nearmiss_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_nearmiss_report"
+              ]
+            },
+            "description": "Enterprise near-miss report",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"nmstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Plant-wide Observations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_observation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_observation"
+              ]
+            },
+            "description": "Enterprise observation log"
+          },
+          "response": []
+        },
+        {
+          "name": "View Observation Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_observation_details/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_observation_details",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Observation details"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Plant Observation Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_obs_report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_obs_report"
+              ]
+            },
+            "description": "Enterprise observation report",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"obsstatus\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Plant-wide Ethics Complaints",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/view_director_ethics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "view_director_ethics"
+              ]
+            },
+            "description": "Enterprise ethics log"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Plant Ethics Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/director_ethics_table",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "director_ethics_table"
+              ]
+            },
+            "description": "Enterprise ethics report",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_date\": \"2026-01-01\",\n  \"to_date\": \"2026-12-31\",\n  \"status\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

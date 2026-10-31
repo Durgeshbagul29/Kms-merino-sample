@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "45225725008",
+    "project_id": "kms-merino-f2c62",
+    "storage_bucket": "kms-merino-f2c62.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:45225725008:android:d19eed0632b2d9f9141555",
+        "android_client_info": {
+          "package_name": "com.Abracadabra.kmsmerino"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuEP6BBJF1hTw3fRmlnlJ58Ql1YCBZXIM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
