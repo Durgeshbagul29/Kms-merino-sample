@@ -1,3 +1,4 @@
+import 'package:kmsmerino/views/screens/user/user_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:kmsmerino/views/base/error_message.dart';
 import 'package:photo_view/photo_view.dart';
@@ -128,6 +129,24 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
                   ),
                 ),
               ),
+              if (widget.kaizenId != null)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.picture_as_pdf_rounded,
+                      color: Theme.of(context).primaryColor,
+                      size: 24,
+                    ),
+                    tooltip: 'Download PDF',
+                    onPressed: () {
+                      generateKaizenPDF(context, widget.kaizenId!);
+                    },
+                  ),
+                ),
             ],
           ),
           SizedBox(height: 12),
@@ -227,8 +246,8 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
                     widget.kaizenData['data']['details']['cost_savings']
                         .toString()
                         .isNotEmpty
-                ? 'â‚¹ ${widget.kaizenData['data']['details']['cost_savings']}'
-                : 'Not specified',
+                ? 'Rs. ${widget.kaizenData['data']['details']['cost_savings']}'
+                : '-',
             icon: Icons.currency_rupee,
           ),
           if (widget.kaizenData['data']['details']['validated_cost_savings'] !=

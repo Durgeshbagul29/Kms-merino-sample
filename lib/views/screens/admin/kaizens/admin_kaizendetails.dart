@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:kmsmerino/views/common/kaizen/common_kaizen_details.dart';
 import 'package:kmsmerino/views/screens/admin/admin_functions.dart';
+import 'package:kmsmerino/views/screens/user/user_functions.dart';
+import 'package:kmsmerino/helper/network_connectivity_manager.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:kmsmerino/views/base/error_message.dart';
 
@@ -53,6 +55,18 @@ class _BNDetailsState extends State<AdminKaizenDetails>
             icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.picture_as_pdf, color: Colors.white),
+              tooltip: 'Export to PDF',
+              onPressed: () async {
+                final networkManager = NetworkManager.instance;
+                final isConnected = await networkManager.checkConnectivityAndShowError();
+                if (!isConnected) return;
+                generateKaizenPDF(context, widget.id);
+              },
+            ),
+          ],
         ),
         body: FutureBuilder<dynamic>(
           future: getAdminKaizenDetails(widget.id),

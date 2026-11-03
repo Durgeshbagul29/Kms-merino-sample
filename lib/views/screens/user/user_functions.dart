@@ -975,30 +975,58 @@ Future<void> generateKaizenPDF(BuildContext context, int id) async {
     return;
   }
 
-  final token = await LoggedInUser.getToken();
-
-  debugPrint('Using base URL for download_kaizen_pdf: ${ApiConfig.baseUrl}');
-  String url = ApiConfig.downloadKaizenPdfUrl(id);
-  final response = await get(
-    Uri.parse(url),
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-      'Authorization': 'Bearer $token',
-    },
+  // Immediately show loading indicator upon clicking
+  CustomLoader.show(
+    context,
+    progressIndicator: CircularProgressIndicator(
+      color: Theme.of(context).primaryColor,
+    ),
+    loaderText: Text(
+      "\nGenerating PDF...",
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+        decoration: TextDecoration.none,
+      ),
+      textAlign: TextAlign.center,
+    ),
   );
-  debugPrint(response.body.toString());
-  var responsebody = json.decode(response.body);
-  debugPrint("\n Response from api:\n$responsebody");
 
-  var data = responsebody['data'];
-  if (data['pdf_status'] == 1) {
+  try {
+    final token = await LoggedInUser.getToken();
+
+    debugPrint('Using base URL for download_kaizen_pdf: ${ApiConfig.baseUrl}');
+    String url = ApiConfig.downloadKaizenPdfUrl(id);
+    final response = await get(
+      Uri.parse(url),
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer $token',
+      },
+    );
+    debugPrint(response.body.toString());
+    var responsebody = json.decode(response.body);
+    debugPrint("\n Response from api:\n$responsebody");
+
+    var data = responsebody is Map ? responsebody['data'] : null;
+    if (data is Map && data['pdf_status'] == 1) {
+      CustomLoader.hide();
+      await downloadFromUrl(context, data['filename'] ?? 'kaizen_$id.pdf', data['url'] ?? '');
+      debugPrint("file generated");
+    } else {
+      CustomLoader.hide();
+      String message = 'Unable to download pdf';
+      if (responsebody is Map && responsebody['message'] != null) {
+        message = responsebody['message'].toString();
+      }
+      dialogBoxForFailure(context, message, 'Please Try Again');
+      debugPrint("not done");
+    }
+  } catch (e) {
     CustomLoader.hide();
-    downloadFromUrl(context, data['filename'], data['url']);
-    debugPrint("file generated");
-  } else {
-    CustomLoader.hide();
-    dialogBoxForFailure(context, 'Unable to download pdf', 'Please Try Again');
-    debugPrint("not done");
+    debugPrint("Error generating PDF: $e");
+    dialogBoxForFailure(context, 'Download Failed', 'Please check your connection and try again');
   }
 }

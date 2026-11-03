@@ -322,7 +322,8 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
 
                     SizedBox(height: 24),
 
-                    // Before Video upload section
+                    /*
+                    // Before Video upload section (Commented out)
                     Text(
                       'Before Video (Optional)',
                       style: TextStyle(
@@ -501,6 +502,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
                                   ),
                       ),
                     ),
+                    */
 
                     SizedBox(height: 20),
 
