@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import '../../utils/app_constants.dart';
 import '../../services/api/api_client.dart';
+import '../../services/api/api_config.dart';
 import '../screens/auth/login.dart';
 import '../screens/auth/loggedin_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,7 +53,7 @@ class _CommonProfileScreenState extends State<CommonProfileScreen> {
     setState(() => _isLoading = true);
     try {
       ApiClient apiClient = Get.find<ApiClient>();
-      final response = await apiClient.getData('/api/get_profile');
+      final response = await apiClient.getData(ApiConfig.getProfileEndpoint);
       if (response.statusCode == 200 && response.body != null) {
         var responsebody = response.body is String
             ? json.decode(response.body)
@@ -162,7 +163,7 @@ class _CommonProfileScreenState extends State<CommonProfileScreen> {
 
       ApiClient apiClient = Get.find<ApiClient>();
       final response = await apiClient.getData(
-        '/api/logout?device_token=${deviceToken ?? ''}',
+        ApiConfig.logoutUrl(deviceToken),
       );
 
       if (response.statusCode == 200 && response.body != null) {

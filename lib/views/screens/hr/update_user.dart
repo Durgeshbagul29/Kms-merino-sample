@@ -60,7 +60,7 @@ class _UpdateUserState extends State<UpdateUser>
   // Future<String> getDepts() async {
   //   final token = await LoggedInUser.getToken();
   //   final response= await get(
-  //     Uri.parse("${ApiConfig.baseUrl}/api/get_depts"),
+  //     Uri.parse(ApiConfig.getDeptsUrl),
   //     headers: {
   //       "Accept": "application/json",
   //       "Content-Type": "application/json",
@@ -816,7 +816,7 @@ class _UpdateUserState extends State<UpdateUser>
         
                                   final response = await post(
                                     Uri.parse(
-                                        "${ApiConfig.baseUrl}/api/update_useroradmin"),
+                                        ApiConfig.updateUserOrAdminUrl),
                                     headers: {
                                       "Accept": "application/json",
                                       'Content-Type': 'application/json',

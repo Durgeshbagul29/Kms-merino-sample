@@ -619,7 +619,7 @@ class _AccidentDetailsContentState extends State<AccidentDetailsContent> {
         final adminid = await LoggedInUser.getUserId();
 
         final response = await post(
-          Uri.parse("${ApiConfig.baseUrl}/api/update_admin_accident"),
+          Uri.parse(ApiConfig.updateAdminAccidentUrl),
           headers: {
             "Accept": "application/json",
             'Content-Type': 'application/json',

@@ -609,7 +609,7 @@ class _NearmissDetailsContentState extends State<NearmissDetailsContent> {
         final adminid = await LoggedInUser.getUserId();
 
         final response = await post(
-          Uri.parse("${ApiConfig.baseUrl}/api/update_admin_nearmiss"),
+          Uri.parse(ApiConfig.updateAdminNearmissUrl),
           headers: {
             "Accept": "application/json",
             'Content-Type': 'application/json',

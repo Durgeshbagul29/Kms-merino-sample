@@ -101,7 +101,7 @@ class _AddNewUserState extends State<AddNewUser> with TickerProviderStateMixin {
   // Future<String> getDepts() async {
   //   final token = await LoggedInUser.getToken();
   //   final response= await get(
-  //     Uri.parse("${ApiConfig.baseUrl}/api/get_depts"),
+  //     Uri.parse(ApiConfig.getDeptsUrl),
   //     headers: {
   //       "Accept": "application/json",
   //       "Content-Type": "application/json",
@@ -632,7 +632,7 @@ class _AddNewUserState extends State<AddNewUser> with TickerProviderStateMixin {
                           debugPrint('==================');
 
                           final response = await post(
-                            Uri.parse("${ApiConfig.baseUrl}/api/add_new_useroradmin"),
+                            Uri.parse(ApiConfig.addNewUserOrAdminUrl),
                             headers: {
                               "Accept": "application/json",
                               'Content-Type': 'application/json',

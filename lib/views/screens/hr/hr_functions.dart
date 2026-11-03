@@ -28,7 +28,7 @@ Future<dynamic> getDashboardData() async {
   debugPrint('Using base URL for dashboard: $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/hr_dashboard"),
+    Uri.parse("$baseUrl${ApiConfig.hrDashboardEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -80,7 +80,7 @@ Future<dynamic> getUserData() async {
   debugPrint('Using base URL for get_all_admins: $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/get_all_admins"),
+    Uri.parse("$baseUrl${ApiConfig.getAllAdminsEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -125,7 +125,7 @@ Future<dynamic> getUserData1() async {
   debugPrint('Using base URL for get_all_users: $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/get_all_users"),
+    Uri.parse("$baseUrl${ApiConfig.getAllUsersEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -170,7 +170,7 @@ Future<dynamic> getAllManagers() async {
   debugPrint('Using base URL for get_all_managers: $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/get_all_managers"),
+    Uri.parse("$baseUrl${ApiConfig.getAllManagersEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -200,7 +200,7 @@ Future<dynamic> getAllDirectors() async {
   debugPrint('Using base URL for get_all_directors: $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/get_all_directors"),
+    Uri.parse("$baseUrl${ApiConfig.getAllDirectorsEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -230,7 +230,7 @@ Future<dynamic> getDepts() async {
   debugPrint('Using base URL for get_depts: $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/get_depts"),
+    Uri.parse("$baseUrl${ApiConfig.getDeptsEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -259,7 +259,7 @@ Future<List<Map<String, dynamic>>> getAllDepartments() async {
   debugPrint('Using base URL for get_all_departments: $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/get_all_departments"),
+    Uri.parse("$baseUrl${ApiConfig.getAllDepartmentsEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -303,7 +303,7 @@ Future<Map<String, dynamic>> assignDepartmentsToManager({
   debugPrint('Request body: ${json.encode(requestBody)}');
   
   final response = await post(
-    Uri.parse("$baseUrl/api/assign_manager_departments"),
+    Uri.parse("$baseUrl${ApiConfig.assignManagerDepartmentsEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -328,7 +328,7 @@ Future<Map<String, dynamic>> assignDepartmentsToManager({
 //   debugPrint('Using base URL for get_manager_departments: $baseUrl');
   
 //   final response = await get(
-//     Uri.parse("$baseUrl/api/get_manager_departments/$managerId"),
+//     Uri.parse("$baseUrl${ApiConfig.getManagerDepartmentsEndpoint}/$managerId"),
 //     headers: {
 //       "Accept": "application/json",
 //       "Content-Type": "application/json",
@@ -359,7 +359,7 @@ Future<void> functionForAddUserAdmin(BuildContext context) async {
   debugPrint('Using base URL for get_depts (add user): $baseUrl');
   
   final response = await get(
-    Uri.parse("$baseUrl/api/get_depts"),
+    Uri.parse("$baseUrl${ApiConfig.getDeptsEndpoint}"),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",

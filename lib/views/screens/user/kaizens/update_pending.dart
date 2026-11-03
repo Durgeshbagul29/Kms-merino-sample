@@ -867,7 +867,7 @@ class _UpdatePendingKaizenState extends State<UpdatePendingKaizen>
   ) async {
     var image = imageFile;
 
-    var uri = Uri.parse("${ApiConfig.baseUrl}/api/update_pending_kaizen");
+    var uri = Uri.parse(ApiConfig.updatePendingKaizenUrl);
 
     var request = http.MultipartRequest("POST", uri);
 

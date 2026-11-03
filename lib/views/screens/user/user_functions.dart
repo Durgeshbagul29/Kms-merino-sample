@@ -37,7 +37,7 @@ Future<dynamic> getUserDashboardData() async {
   final name = await LoggedInUser.getName();
 
   debugPrint('Using base URL for user dashboard: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/user_dashboard";
+  String url = ApiConfig.userDashboardUrl;
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -82,7 +82,7 @@ Future<dynamic> getUserComplaints() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_complaints: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_complaints";
+  String url = ApiConfig.viewUserComplaintsUrl();
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -124,7 +124,7 @@ Future<dynamic> getUserBroadcast() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_broadcast: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_broadcast";
+  String url = ApiConfig.viewUserBroadcastUrl;
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -166,7 +166,7 @@ Future<dynamic> getUserAccidents() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_accidents: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_accidents";
+  String url = ApiConfig.viewUserAccidentsUrl();
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -207,7 +207,7 @@ Future<dynamic> getUserAccidentDetails(int id) async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_accident_details: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_accident_details/$id";
+  String url = ApiConfig.viewUserAccidentDetailsUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -249,7 +249,7 @@ Future<dynamic> getUserNearmiss() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_nearmiss: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_nearmiss";
+  String url = ApiConfig.viewUserNearmissUrl();
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -291,7 +291,7 @@ Future<dynamic> getUserNearmissDetails(int id) async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_nearmiss_details: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_nearmiss_details/$id";
+  String url = ApiConfig.viewUserNearmissDetailsUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -333,7 +333,7 @@ Future<dynamic> getUserObservation() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_observation: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_observation";
+  String url = ApiConfig.viewUserObservationUrl();
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -375,7 +375,7 @@ Future<dynamic> getUserObservationDetails(int id) async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_obs_details: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_obs_details/$id";
+  String url = ApiConfig.viewUserObsDetailsUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -417,7 +417,7 @@ Future<dynamic> getUserApprovedKaizens() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_approvedkaizens: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_approvedkaizens";
+  String url = ApiConfig.viewUserApprovedKaizensUrl;
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -459,7 +459,7 @@ Future<dynamic> getUserSubmittedKaizens() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_submittedkaizens: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_submittedkaizens";
+  String url = ApiConfig.viewUserSubmittedKaizensUrl;
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -501,7 +501,7 @@ Future<dynamic> getUserViewKaizens(String type) async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_kaizens: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_kaizens/$type";
+  String url = ApiConfig.viewUserKaizensUrl(type);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -544,7 +544,7 @@ Future<dynamic> getUserBNDetails(int id) async {
   final userid = await LoggedInUser.getUserId();
 
   debugPrint('Using base URL for seen_user_broadcast_notf: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/seen_user_broadcast_notf/$userid/$id";
+  String url = ApiConfig.seenUserBroadcastNotfUrl(userid, id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -586,7 +586,7 @@ Future<dynamic> getUserKaizenDetails(int id) async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_kaizens_details: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_kaizens_details/$id";
+  String url = ApiConfig.viewUserKaizenDetailsUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -640,7 +640,7 @@ Future<void> deletePendingKaizen(BuildContext context, int dataid, Widget filena
   );
 
   debugPrint('Using base URL for delete_user_kaizen: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/delete_user_kaizen";
+  String url = ApiConfig.deleteUserKaizenUrl;
   final response = await post(
     Uri.parse(url),
     headers: {
@@ -686,7 +686,7 @@ Future<dynamic> getUserSectionNotifications() async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for view_user_notifications: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_notifications";
+  String url = ApiConfig.viewUserNotificationsUrl;
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -740,7 +740,7 @@ Future<void> deleteSectionNotification(BuildContext context, int dataid) async {
   );
 
   debugPrint('Using base URL for delete_user_notf: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/delete_user_notf";
+  String url = ApiConfig.deleteUserNotificationUrl;
   final response = await post(
     Uri.parse(url),
     headers: {
@@ -781,7 +781,7 @@ Future<void> reviewSectionNotification(BuildContext context, int id, Widget file
   final userid = await LoggedInUser.getUserId();
 
   debugPrint('Using base URL for review_user_section_notf: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/review_user_section_notf/$userid/$id";
+  String url = ApiConfig.reviewUserSectionNotfUrl(userid, id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -853,7 +853,7 @@ Future<void> viewSectionNotification(BuildContext context, int id, Widget filena
   final userid = await LoggedInUser.getUserId();
 
   debugPrint('Using base URL for view_user_section_notf: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_user_section_notf/$userid/$id";
+  String url = ApiConfig.viewUserSectionNotfUrl(userid, id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -925,7 +925,7 @@ Future<void> getUserKaizenDetailsForPendingUpdate(BuildContext context, int id, 
   debugPrint(
     'Using base URL for view_user_kaizens_details (pending update): ${ApiConfig.baseUrl}',
   );
-  String url = "${ApiConfig.baseUrl}/api/view_user_kaizens_details/$id";
+  String url = ApiConfig.viewUserKaizenDetailsUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -978,7 +978,7 @@ Future<void> generateKaizenPDF(BuildContext context, int id) async {
   final token = await LoggedInUser.getToken();
 
   debugPrint('Using base URL for download_kaizen_pdf: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/download_kaizen_pdf/$id";
+  String url = ApiConfig.downloadKaizenPdfUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {

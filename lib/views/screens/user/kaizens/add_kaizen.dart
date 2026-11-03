@@ -845,7 +845,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
     String costdata,
   ) async {
     String baseUrl = await getTenantBaseUrl();
-    var uri = Uri.parse("$baseUrl/api/add_kaizen_record");
+    var uri = Uri.parse("$baseUrl${ApiConfig.addKaizenRecordEndpoint}");
     var request = http.MultipartRequest("POST", uri);
 
     if (imageFile != null) {
@@ -1274,7 +1274,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
     final userid = await LoggedInUser.getUserId();
     String baseUrl = await getTenantBaseUrl();
 
-    var uri = Uri.parse("$baseUrl/api/add_kaizen_record");
+    var uri = Uri.parse("$baseUrl${ApiConfig.addKaizenRecordEndpoint}");
     var request = http.MultipartRequest("POST", uri);
 
     if (imageFile != null) {

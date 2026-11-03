@@ -38,7 +38,7 @@ Future<dynamic> getDirectorDashboard() async {
 
   
   debugPrint('Using base URL for director dashboard: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/director_dashboard?director_id=$directorId";
+  String url = ApiConfig.directorDashboardUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -83,7 +83,7 @@ Future<dynamic> getViewDirectorAllKaizens() async {
 
   
   debugPrint('Using base URL for view_director_allkaizens: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_director_allkaizens?director_id=$directorId";
+  String url = ApiConfig.viewDirectorAllKaizensUrl(directorId);
 
   final response = await get(
     Uri.parse(url),
@@ -128,7 +128,7 @@ Future<dynamic> getViewDirectorKaizenType(String kaizenType) async {
   
   debugPrint('Using base URL for view_director_kaizentype: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_director_kaizentype/$kaizenType?director_id=$directorId";
+      ApiConfig.viewDirectorKaizenTypeUrl(kaizenType, directorId);
 
   final response = await get(
     Uri.parse(url),
@@ -171,7 +171,7 @@ Future<dynamic> getDirectorComplaints() async {
 
   
   debugPrint('Using base URL for view_director_ethics: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_director_ethics?director_id=$directorId";
+  String url = ApiConfig.viewDirectorEthicsUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -227,7 +227,7 @@ Future<dynamic> reviewComplaintByDirector(BuildContext context, int dataid) asyn
   
   debugPrint('Using base URL for review_director_complaint: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/review_director_complaint/$directorId/$dataid";
+      ApiConfig.reviewDirectorComplaintUrl(directorId, dataid);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -275,7 +275,7 @@ Future<dynamic> getDirectorKaizenFilesData() async {
   
   debugPrint('Using base URL for director_kaizen_archive_files: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/director_kaizen_archive_files?director_id=$directorId";
+      ApiConfig.directorKaizenArchiveFilesUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -319,7 +319,7 @@ Future<dynamic> getDirectorAccidentFilesData() async {
   
   debugPrint('Using base URL for director_accident_archive_files: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/director_accident_archive_files?director_id=$directorId";
+      ApiConfig.directorAccidentArchiveFilesUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -363,7 +363,7 @@ Future<dynamic> getDirectorNearmissFilesData() async {
   
   debugPrint('Using base URL for director_nearmiss_archive_files: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/director_nearmiss_archive_files?director_id=$directorId";
+      ApiConfig.directorNearmissArchiveFilesUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -407,7 +407,7 @@ Future<dynamic> getDirectorObservationFilesData() async {
   
   debugPrint('Using base URL for director_observation_archive_files: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/director_observation_archive_files?director_id=$directorId";
+      ApiConfig.directorObservationArchiveFilesUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -451,7 +451,7 @@ Future<dynamic> getDirectorEthicsFilesData() async {
   
   debugPrint('Using base URL for director_ethics_archive_files: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/director_ethics_archive_files?director_id=$directorId";
+      ApiConfig.directorEthicsArchiveFilesUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -494,7 +494,7 @@ Future<dynamic> getDirectorBroadcast() async {
 
   
   debugPrint('Using base URL for view_director_broadcast: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_director_broadcast?director_id=$directorId";
+  String url = ApiConfig.viewDirectorBroadcastUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -551,7 +551,7 @@ Future<void> deleteBroadcastNotification(BuildContext context, int dataid) async
   );
 
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/delete_director_broadcast"),
+    Uri.parse(ApiConfig.deleteDirectorBroadcastUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -598,7 +598,7 @@ Future<dynamic> getBroadcastDetails(int id) async {
   
   debugPrint('Using base URL for view_director_broadcast_details: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_director_broadcast_details/$id?director_id=$directorId";
+      ApiConfig.viewDirectorBroadcastDetailsUrl(id, directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -641,7 +641,7 @@ Future<dynamic> getDirectorAccidents() async {
 
   
   debugPrint('Using base URL for view_director_accident: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_director_accident?director_id=$directorId";
+  String url = ApiConfig.viewDirectorAccidentUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -685,7 +685,7 @@ Future<dynamic> getDirectorAccidentDetails(int id) async {
   
   debugPrint('Using base URL for view_director_accident_details: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_director_accident_details/$id?director_id=$directorId";
+      ApiConfig.viewDirectorAccidentDetailsUrl(id, directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -728,7 +728,7 @@ Future<dynamic> getDirectorNearmiss() async {
 
   
   debugPrint('Using base URL for view_director_nearmiss: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_director_nearmiss?director_id=$directorId";
+  String url = ApiConfig.viewDirectorNearmissUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -772,7 +772,7 @@ Future<dynamic> getDirectorNearmissDetails(int id) async {
   
   debugPrint('Using base URL for view_director_nearmiss_details: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_director_nearmiss_details/$id?director_id=$directorId";
+      ApiConfig.viewDirectorNearmissDetailsUrl(id, directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -815,7 +815,7 @@ Future<dynamic> getDirectorObservation() async {
 
   
   debugPrint('Using base URL for view_director_observation: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_director_observation?director_id=$directorId";
+  String url = ApiConfig.viewDirectorObservationUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -859,7 +859,7 @@ Future<dynamic> getDirectorObservationDetails(int id) async {
   
   debugPrint('Using base URL for view_director_observation_details: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_director_observation_details/$id?director_id=$directorId";
+      ApiConfig.viewDirectorObservationDetailsUrl(id, directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -903,7 +903,7 @@ Future<dynamic> getDirectorViewKaizen(String type) async {
   
   debugPrint('Using base URL for view_director_kaizentype: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_director_kaizentype/$type?director_id=$directorId";
+      ApiConfig.viewDirectorKaizenTypeUrl(type, directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -946,7 +946,7 @@ Future<dynamic> getDirectorKaizenNotifications() async {
 
   
   debugPrint('Using base URL for view_director_kaizen_notf: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/view_director_kaizen_notf?director_id=$directorId";
+  String url = ApiConfig.viewDirectorKaizenNotfUrl(directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -1004,7 +1004,7 @@ Future<dynamic> reviewKaizenNotification(BuildContext context,
   
   debugPrint('Using base URL for review_director_kaizen_notf: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/review_director_kaizen_notf/$directorId/$dataid";
+      ApiConfig.reviewDirectorKaizenNotfUrl(directorId, dataid);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -1051,7 +1051,7 @@ Future<dynamic> getDirectorKaizenDetails(int id, int directorId) async {
   
   debugPrint('Using base URL for view_director_kaizen_details: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_director_kaizen_details/$id?director_id=$directorId";
+      ApiConfig.viewDirectorKaizenDetailsUrl(id, directorId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -1094,7 +1094,7 @@ Future<dynamic> getKaizenKPIData(int directorId) async {
   
   debugPrint('Using base URL for director_kaizen_kpi: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_kaizen_kpi"),
+    Uri.parse(ApiConfig.directorKaizenKpiUrl),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -1136,7 +1136,7 @@ Future<dynamic> getKaizenReport(BuildContext context,
   
   debugPrint('Using base URL for director_kaizen_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_kaizen_report"),
+    Uri.parse(ApiConfig.directorKaizenReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1184,7 +1184,7 @@ Future<dynamic> getAccidentReport(BuildContext context,
   
   debugPrint('Using base URL for director_accident_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_accident_report"),
+    Uri.parse(ApiConfig.directorAccidentReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1232,7 +1232,7 @@ Future<dynamic> getNearmissReport(BuildContext context,
   
   debugPrint('Using base URL for director_nearmiss_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_nearmiss_report"),
+    Uri.parse(ApiConfig.directorNearmissReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1276,7 +1276,7 @@ Future<dynamic> getEthicsReport(BuildContext context, int status, String fromdat
   
   debugPrint('Using base URL for director_ethics_table: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_ethics_table"),
+    Uri.parse(ApiConfig.directorEthicsTableUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1324,7 +1324,7 @@ Future<dynamic> getObservationReport(BuildContext context,
   
   debugPrint('Using base URL for director_obs_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_obs_report"),
+    Uri.parse(ApiConfig.directorObsReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1388,7 +1388,7 @@ Future<void> generateEthicsExcel(BuildContext context,
   
   debugPrint('Using base URL for director_ethics_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_ethics_excel"),
+    Uri.parse(ApiConfig.directorEthicsExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1454,7 +1454,7 @@ Future<void> generateAccidentExcel(
   
   debugPrint('Using base URL for director_accident_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_accident_excel"),
+    Uri.parse(ApiConfig.directorAccidentExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1520,7 +1520,7 @@ Future<void> generateNearmissExcel(
   
   debugPrint('Using base URL for director_nearmiss_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_nearmiss_excel"),
+    Uri.parse(ApiConfig.directorNearmissExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1586,7 +1586,7 @@ Future<void> generateObservationExcel(
   
   debugPrint('Using base URL for director_observation_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_observation_excel"),
+    Uri.parse(ApiConfig.directorObservationExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1651,7 +1651,7 @@ Future<void> generateKaizenExcel(BuildContext context,
   
   debugPrint('Using base URL for director_kaizen_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_kaizen_excel"),
+    Uri.parse(ApiConfig.directorKaizenExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1696,7 +1696,7 @@ Future<void> downloadAccidentFile(int id, int directorId) async {
   debugPrint('Using base URL for download_director_accident_file: ${ApiConfig.baseUrl}');
   final response = await get(
     Uri.parse(
-      "${ApiConfig.baseUrl}/api/download_director_accident_file/$id?director_id=$directorId",
+      ApiConfig.downloadDirectorAccidentFileUrl(id, directorId),
     ),
     headers: {
       "Accept": "application/json",
@@ -1757,7 +1757,7 @@ Future<void> downloadAccidentExcel(
   
   debugPrint('Using base URL for director_downloadurl_accidentexcel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_downloadurl_accidentexcel"),
+    Uri.parse(ApiConfig.directorDownloadUrlAccidentExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1827,7 +1827,7 @@ Future<void> downloadNearmissExcel(
   
   debugPrint('Using base URL for director_downloadurl_nearmissexcel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_downloadurl_nearmissexcel"),
+    Uri.parse(ApiConfig.directorDownloadUrlNearmissExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1897,7 +1897,7 @@ Future<void> downloadObservationExcel(
   
   debugPrint('Using base URL for director_downloadurl_observationexcel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_downloadurl_observationexcel"),
+    Uri.parse(ApiConfig.directorDownloadUrlObservationExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1966,7 +1966,7 @@ Future<void> downloadKaizenExcel(BuildContext context,
   
   debugPrint('Using base URL for director_downloadurl_kaizenexcel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_downloadurl_kaizenexcel"),
+    Uri.parse(ApiConfig.directorDownloadUrlKaizenExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -2035,7 +2035,7 @@ Future<void> downloadEthicsExcel(BuildContext context,
   
   debugPrint('Using base URL for director_downloadurl_ethicsexcel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/director_downloadurl_ethicsexcel"),
+    Uri.parse(ApiConfig.directorDownloadUrlEthicsExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',

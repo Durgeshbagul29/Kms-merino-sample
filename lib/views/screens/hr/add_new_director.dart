@@ -542,7 +542,7 @@ class _AddNewDirectorState extends State<AddNewDirector>
 
                         if (password == cpassword) {
                           final response = await post(
-                            Uri.parse("${ApiConfig.baseUrl}/api/add_director"),
+                            Uri.parse(ApiConfig.addDirectorUrl),
                             headers: {
                               "Accept": "application/json",
                               'Content-Type': 'application/json',

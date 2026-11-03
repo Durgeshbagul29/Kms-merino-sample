@@ -244,7 +244,7 @@ class _AddComplaintState extends State<AddComplaint>
 
                               final response = await post(
                                 Uri.parse(
-                                  "${ApiConfig.baseUrl}/api/add_user_complaint",
+                                  ApiConfig.addUserComplaintUrl,
                                 ),
                                 headers: {
                                   "Accept": "application/json",

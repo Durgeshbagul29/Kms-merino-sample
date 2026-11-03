@@ -417,7 +417,7 @@ class _ManagerAddBroadcastState extends State<ManagerAddBroadcast>
     String msg,
     File? imageFile,
   ) async {
-    var uri = Uri.parse('${ApiConfig.baseUrl}/api/add_manager_broadcast');
+    var uri = Uri.parse(ApiConfig.addManagerBroadcastUrl);
     var request = http.MultipartRequest('POST', uri);
 
     request.headers['Authorization'] = 'Bearer $token';

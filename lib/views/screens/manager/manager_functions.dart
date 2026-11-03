@@ -37,7 +37,7 @@ Future<dynamic> getManagerDashboard() async {
 
   debugPrint('Using base URL for manager dashboard: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/manager_dashboard?manager_id=$managerId";
+      ApiConfig.managerDashboardUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -82,7 +82,7 @@ Future<dynamic> getViewManagerAllKaizens() async {
 
   debugPrint('Using base URL for view_manager_allkaizens: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_allkaizens?manager_id=$managerId";
+      ApiConfig.viewManagerAllKaizensUrl(managerId);
 
   final response = await get(
     Uri.parse(url),
@@ -126,7 +126,7 @@ Future<dynamic> getViewManagerKaizenType(String kaizenType) async {
 
   debugPrint('Using base URL for view_manager_kaizentype: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_kaizentype/$kaizenType?manager_id=$managerId";
+      ApiConfig.viewManagerKaizenTypeUrl(kaizenType, managerId);
 
   final response = await get(
     Uri.parse(url),
@@ -169,7 +169,7 @@ Future<dynamic> getManagerComplaints() async {
 
   debugPrint('Using base URL for view_manager_ethics: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_ethics?manager_id=$managerId";
+      ApiConfig.viewManagerEthicsUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -224,7 +224,7 @@ Future<dynamic> reviewComplaintByManager(BuildContext context, int dataid) async
 
   debugPrint('Using base URL for review_manager_complaint: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/review_manager_complaint/$managerId/$dataid";
+      ApiConfig.reviewManagerComplaintUrl(managerId, dataid);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -273,7 +273,7 @@ Future<dynamic> getManagerKaizenFilesData() async {
     'Using base URL for manager_kaizen_archive_files: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/manager_kaizen_archive_files?manager_id=$managerId";
+      ApiConfig.managerKaizenArchiveFilesUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -318,7 +318,7 @@ Future<dynamic> getManagerAccidentFilesData() async {
     'Using base URL for manager_accident_archive_files: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/manager_accident_archive_files?manager_id=$managerId";
+      ApiConfig.managerAccidentArchiveFilesUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -363,7 +363,7 @@ Future<dynamic> getManagerNearmissFilesData() async {
     'Using base URL for manager_nearmiss_archive_files: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/manager_nearmiss_archive_files?manager_id=$managerId";
+      ApiConfig.managerNearmissArchiveFilesUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -408,7 +408,7 @@ Future<dynamic> getManagerObservationFilesData() async {
     'Using base URL for manager_observation_archive_files: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/manager_observation_archive_files?manager_id=$managerId";
+      ApiConfig.managerObservationArchiveFilesUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -453,7 +453,7 @@ Future<dynamic> getManagerEthicsFilesData() async {
     'Using base URL for manager_ethics_archive_files: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/manager_ethics_archive_files?manager_id=$managerId";
+      ApiConfig.managerEthicsArchiveFilesUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -496,7 +496,7 @@ Future<dynamic> getManagerBroadcast() async {
 
   debugPrint('Using base URL for view_manager_broadcast: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_broadcast?manager_id=$managerId";
+      ApiConfig.viewManagerBroadcastUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -552,7 +552,7 @@ Future<void> deleteBroadcastNotification(BuildContext context, int dataid) async
   );
 
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/delete_manager_broadcast"),
+    Uri.parse(ApiConfig.deleteManagerBroadcastUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -599,7 +599,7 @@ Future<dynamic> getBroadcastDetails(int id) async {
     'Using base URL for view_manager_broadcast_details: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_broadcast_details/$id?manager_id=$managerId";
+      ApiConfig.viewManagerBroadcastDetailsUrl(id, managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -642,7 +642,7 @@ Future<dynamic> getManagerAccidents() async {
 
   debugPrint('Using base URL for view_manager_accident: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_accident?manager_id=$managerId";
+      ApiConfig.viewManagerAccidentUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -687,7 +687,7 @@ Future<dynamic> getManagerAccidentDetails(int id) async {
     'Using base URL for view_manager_accident_details: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_accident_details/$id?manager_id=$managerId";
+      ApiConfig.viewManagerAccidentDetailsUrl(id, managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -730,7 +730,7 @@ Future<dynamic> getManagerNearmiss() async {
 
   debugPrint('Using base URL for view_manager_nearmiss: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_nearmiss?manager_id=$managerId";
+      ApiConfig.viewManagerNearmissUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -775,7 +775,7 @@ Future<dynamic> getManagerNearmissDetails(int id) async {
     'Using base URL for view_manager_nearmiss_details: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_nearmiss_details/$id?manager_id=$managerId";
+      ApiConfig.viewManagerNearmissDetailsUrl(id, managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -818,7 +818,7 @@ Future<dynamic> getManagerObservation() async {
 
   debugPrint('Using base URL for view_manager_observation: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_observation?manager_id=$managerId";
+      ApiConfig.viewManagerObservationUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -863,7 +863,7 @@ Future<dynamic> getManagerObservationDetails(int id) async {
     'Using base URL for view_manager_observation_details: ${ApiConfig.baseUrl}',
   );
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_observation_details/$id?manager_id=$managerId";
+      ApiConfig.viewManagerObservationDetailsUrl(id, managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -905,7 +905,7 @@ Future<dynamic> getManagerMyTeam() async {
   final managerId = await LoggedInUser.getUserId();
 
   debugPrint('Using base URL for manager_my_team: ${ApiConfig.baseUrl}');
-  String url = "${ApiConfig.baseUrl}/api/manager_my_team?manager_id=$managerId";
+  String url = ApiConfig.managerMyTeamUrl(managerId);
 
   final response = await get(
     Uri.parse(url),
@@ -949,7 +949,7 @@ Future<dynamic> getManagerViewKaizen(String type) async {
 
   debugPrint('Using base URL for view_manager_kaizentype: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_kaizentype/$type?manager_id=$managerId";
+      ApiConfig.viewManagerKaizenTypeUrl(type, managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -992,7 +992,7 @@ Future<dynamic> getManagerKaizenNotifications() async {
 
   debugPrint('Using base URL for view_manager_kaizen_notf: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_kaizen_notf?manager_id=$managerId";
+      ApiConfig.viewManagerKaizenNotfUrl(managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -1049,7 +1049,7 @@ Future<dynamic> reviewKaizenNotification(BuildContext context,
 
   debugPrint('Using base URL for review_manager_kaizen_notf: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/review_manager_kaizen_notf/$managerId/$dataid";
+      ApiConfig.reviewManagerKaizenNotfUrl(managerId, dataid);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -1095,7 +1095,7 @@ Future<dynamic> getManagerKaizenDetails(int id, int managerId) async {
 
   debugPrint('Using base URL for view_manager_kaizen_details: ${ApiConfig.baseUrl}');
   String url =
-      "${ApiConfig.baseUrl}/api/view_manager_kaizen_details/$id?manager_id=$managerId";
+      ApiConfig.viewManagerKaizenDetailsUrl(id, managerId);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -1137,7 +1137,7 @@ Future<dynamic> getKaizenKPIData(int managerId) async {
 
   debugPrint('Using base URL for manager_kaizen_kpi: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_kaizen_kpi"),
+    Uri.parse(ApiConfig.managerKaizenKpiUrl),
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -1178,7 +1178,7 @@ Future<dynamic> getKaizenReport(BuildContext context,
 
   debugPrint('Using base URL for manager_kaizen_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_kaizen_report"),
+    Uri.parse(ApiConfig.managerKaizenReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1225,7 +1225,7 @@ Future<dynamic> getAccidentReport(BuildContext context,
 
   debugPrint('Using base URL for manager_accident_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_accident_report"),
+    Uri.parse(ApiConfig.managerAccidentReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1272,7 +1272,7 @@ Future<dynamic> getNearmissReport(BuildContext context,
 
   debugPrint('Using base URL for manager_nearmiss_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_nearmiss_report"),
+    Uri.parse(ApiConfig.managerNearmissReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1319,7 +1319,7 @@ Future<dynamic> getObservationReport(BuildContext context,
 
   debugPrint('Using base URL for manager_obs_report: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_obs_report"),
+    Uri.parse(ApiConfig.managerObsReportUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1366,7 +1366,7 @@ Future<dynamic> getEthicsReport(BuildContext context,
 
   debugPrint('Using base URL for manager_ethics_table: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_ethics_table"),
+    Uri.parse(ApiConfig.managerEthicsTableUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1430,7 +1430,7 @@ Future<void> generateEthicsExcel(BuildContext context,
 
   debugPrint('Using base URL for manager_ethics_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_ethics_excel"),
+    Uri.parse(ApiConfig.managerEthicsExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1496,7 +1496,7 @@ Future<void> generateAccidentExcel(
 
   debugPrint('Using base URL for manager_accident_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_accident_excel"),
+    Uri.parse(ApiConfig.managerAccidentExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1562,7 +1562,7 @@ Future<void> generateNearmissExcel(
 
   debugPrint('Using base URL for manager_nearmiss_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_nearmiss_excel"),
+    Uri.parse(ApiConfig.managerNearmissExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1628,7 +1628,7 @@ Future<void> generateObservationExcel(
 
   debugPrint('Using base URL for manager_observation_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_observation_excel"),
+    Uri.parse(ApiConfig.managerObservationExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1693,7 +1693,7 @@ Future<void> generateKaizenExcel(BuildContext context,
 
   debugPrint('Using base URL for manager_kaizen_excel: ${ApiConfig.baseUrl}');
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_kaizen_excel"),
+    Uri.parse(ApiConfig.managerKaizenExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1739,7 +1739,7 @@ Future<void> downloadAccidentFile(int id, int managerId) async {
   );
   final response = await get(
     Uri.parse(
-      "${ApiConfig.baseUrl}/api/download_manager_accident_file/$id?manager_id=$managerId",
+      ApiConfig.downloadManagerAccidentFileUrl(id, managerId),
     ),
     headers: {
       "Accept": "application/json",
@@ -1802,7 +1802,7 @@ Future<void> downloadAccidentExcel(
     'Using base URL for manager_downloadurl_accidentexcel: ${ApiConfig.baseUrl}',
   );
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_downloadurl_accidentexcel"),
+    Uri.parse(ApiConfig.managerDownloadUrlAccidentExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1874,7 +1874,7 @@ Future<void> downloadNearmissExcel(
     'Using base URL for manager_downloadurl_nearmissexcel: ${ApiConfig.baseUrl}',
   );
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_downloadurl_nearmissexcel"),
+    Uri.parse(ApiConfig.managerDownloadUrlNearmissExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -1946,7 +1946,7 @@ Future<void> downloadObservationExcel(
     'Using base URL for manager_downloadurl_observationexcel: ${ApiConfig.baseUrl}',
   );
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_downloadurl_observationexcel"),
+    Uri.parse(ApiConfig.managerDownloadUrlObservationExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -2017,7 +2017,7 @@ Future<void> downloadKaizenExcel(BuildContext context,
     'Using base URL for manager_downloadurl_kaizenexcel: ${ApiConfig.baseUrl}',
   );
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_downloadurl_kaizenexcel"),
+    Uri.parse(ApiConfig.managerDownloadUrlKaizenExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',
@@ -2088,7 +2088,7 @@ Future<void> downloadEthicsExcel(BuildContext context,
     'Using base URL for manager_downloadurl_ethicsexcel: ${ApiConfig.baseUrl}',
   );
   final response = await post(
-    Uri.parse("${ApiConfig.baseUrl}/api/manager_downloadurl_ethicsexcel"),
+    Uri.parse(ApiConfig.managerDownloadUrlEthicsExcelUrl),
     headers: {
       "Accept": "application/json",
       'Content-Type': 'application/json',

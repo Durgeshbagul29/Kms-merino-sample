@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:kmsmerino/services/api/api_client.dart';
+import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:kmsmerino/utils/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +22,7 @@ class AuthController extends GetxController implements GetxService {
     _isLoading = true;
     update();
 
-    Response response = await apiClient.postData("/api/login", {
+    Response response = await apiClient.postData(ApiConfig.loginEndpoint, {
       "email": username,
       "password": password,
     });
@@ -125,7 +126,7 @@ class AuthController extends GetxController implements GetxService {
         }
 
         Response response = await apiClient.postData(
-          "/api/register_device_token",
+          ApiConfig.registerDeviceTokenEndpoint,
           {
             "token": fcmToken,
             "device_type": deviceType,

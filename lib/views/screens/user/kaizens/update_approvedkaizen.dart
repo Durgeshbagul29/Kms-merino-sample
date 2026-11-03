@@ -461,7 +461,7 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
 
   void uploadImage(BuildContext context, String token, int user, String improvedata, File? imageFile, File? videoFile) async {
     String baseUrl = await getTenantBaseUrl();
-    var uri = Uri.parse("$baseUrl/api/update_approved_kaizen");
+    var uri = Uri.parse("$baseUrl${ApiConfig.updateApprovedKaizenEndpoint}");
     var request = http.MultipartRequest("POST", uri);
 
     if (imageFile != null) {

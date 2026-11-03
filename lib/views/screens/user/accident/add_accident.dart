@@ -591,7 +591,7 @@ class _AddAccidentState extends State<AddAccident>
     File? imageFile,
   ) async {
     var image = imageFile;
-    var uri = Uri.parse("${ApiConfig.baseUrl}/api/add_accident_record");
+    var uri = Uri.parse(ApiConfig.addAccidentRecordUrl);
     var request = http.MultipartRequest("POST", uri);
 
     if (image != null) {

@@ -460,7 +460,7 @@ class _AddNearmissState extends State<AddNearmiss> with TickerProviderStateMixin
 
     var image = imageFile;
 
-    var uri = Uri.parse("${ApiConfig.baseUrl}/api/add_nearmiss_record");
+    var uri = Uri.parse(ApiConfig.addNearmissRecordUrl);
 
     var request = http.MultipartRequest("POST", uri);
 

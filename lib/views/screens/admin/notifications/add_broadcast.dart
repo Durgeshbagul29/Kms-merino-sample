@@ -438,7 +438,7 @@ class _AddBroadcastState extends State<AddBroadcast> with TickerProviderStateMix
 
     // var stream= http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
     // var length= await imageFile.length();
-    var uri = Uri.parse("${ApiConfig.baseUrl}/api/add_broadcast");
+    var uri = Uri.parse(ApiConfig.addBroadcastUrl);
 
     var request = http.MultipartRequest("POST", uri);
 
@@ -487,7 +487,7 @@ class _AddBroadcastState extends State<AddBroadcast> with TickerProviderStateMix
     //   var length = await _image.length();
 
     //   // string to uri
-    //   var uri = Uri.parse("http://ip:8082/composer/predict");
+    //   var uri = Uri.parse(ApiConfig.addBroadcastUrl);
 
     //   // create multipart request
     //   var request = http.MultipartRequest("POST", uri);

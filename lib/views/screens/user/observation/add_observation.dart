@@ -459,7 +459,7 @@ class _AddObservationState extends State<AddObservation> with TickerProviderStat
 
     var image = imageFile;
 
-    var uri = Uri.parse("${ApiConfig.baseUrl}/api/add_observation_record");
+    var uri = Uri.parse(ApiConfig.addObservationRecordUrl);
 
     var request = http.MultipartRequest("POST", uri);
 

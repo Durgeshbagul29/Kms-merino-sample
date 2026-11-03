@@ -603,7 +603,7 @@ class _ObservationDetailsContentState extends State<ObservationDetailsContent> {
         final adminid = await LoggedInUser.getUserId();
 
         final response = await http.post(
-          Uri.parse("${ApiConfig.baseUrl}/api/update_admin_observation"),
+          Uri.parse(ApiConfig.updateAdminObservationUrl),
           headers: {
             "Accept": "application/json",
             'Content-Type': 'application/json',

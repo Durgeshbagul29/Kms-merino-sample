@@ -1726,7 +1726,7 @@ class _MyFormState extends State<_MyForm> {
 
                                     final response = await post(
                                       Uri.parse(
-                                        "${ApiConfig.baseUrl}/api/update_admin_kaizen",
+                                        ApiConfig.updateAdminKaizenUrl,
                                       ),
                                       headers: {
                                         "Accept": "application/json",

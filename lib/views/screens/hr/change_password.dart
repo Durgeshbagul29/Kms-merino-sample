@@ -398,7 +398,7 @@ class _ChangePasswordState extends State<ChangePassword>
 
                                 final response = await post(
                                   Uri.parse(
-                                      "${ApiConfig.baseUrl}/api/change_password"),
+                                      ApiConfig.changePasswordUrl),
                                   headers: {
                                     "Accept": "application/json",
                                     'Content-Type': 'application/json',
