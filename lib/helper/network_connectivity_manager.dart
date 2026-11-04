@@ -1,10 +1,8 @@
-
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:kmsmerino/views/base/no_internet_screen.dart';
-
 
 /// ---------------------------------------------------------------------------
 /// NetworkManager
@@ -43,7 +41,7 @@ class NetworkManager extends GetxController {
       // AppLoaders.warningSnackBar(
       //   title: 'No Internet Connection',
       //   message:
-      //   'Youâ€™re offline. Please check your Wi-Fi or mobile data and try again.',
+      //   'You™re offline. Please check your Wi-Fi or mobile data and try again.',
       // );
 
       // Option 2: Navigate to dedicated no internet screen
@@ -57,9 +55,9 @@ class NetworkManager extends GetxController {
                   Get.back(); // Dismiss the no internet screen
                 } else {
                   // Get.snackbar(
-                    // title: 'Still Offline',
-                    // message:
-                    // 'Unable to reconnect. Please verify your internet settings.',
+                  // title: 'Still Offline',
+                  // message:
+                  // 'Unable to reconnect. Please verify your internet settings.',
                   // );
                 }
               },
@@ -71,10 +69,7 @@ class NetworkManager extends GetxController {
       // Optional: Show success message when connection is restored
       if (Get.currentRoute == '/NoInternetScreen') {
         Get.back(); // Automatically dismiss the offline screen
-        Get.snackbar(
-          'Back Online',
-          'Your connection has been restored.',
-        );
+        Get.snackbar('Back Online', 'Your connection has been restored.');
       }
     }
   }

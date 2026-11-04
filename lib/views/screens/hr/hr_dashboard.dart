@@ -541,7 +541,10 @@ class _HrDashboardState extends State<HrDashboard> {
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: color.withValues(alpha: 0.25), width: 1.5),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -644,7 +647,7 @@ class _HrDashboardState extends State<HrDashboard> {
             },
           ),
 
-          // Users â€” async
+          // Users ” async
           FutureBuilder<dynamic>(
             future: getUserData1(),
             builder: (context, snap) {

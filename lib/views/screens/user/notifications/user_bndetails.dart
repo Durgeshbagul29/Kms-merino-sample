@@ -1,14 +1,17 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:kmsmerino/views/base/dialog_box_design.dart';
 import 'package:kmsmerino/views/base/error_message.dart';
 import 'package:kmsmerino/views/screens/user/user_functions.dart';
+import 'package:photo_view/photo_view.dart';
 
 class UserBNDetails extends StatefulWidget {
   final int id;
   final Widget filename;
-  const UserBNDetails(this.id, this.filename, {super.key});
+  final dynamic broadcastData;
+
+  const UserBNDetails(this.id, this.filename, {this.broadcastData, super.key});
+
   @override
   State<UserBNDetails> createState() => _UserBNDetailsState();
 }
@@ -16,6 +19,7 @@ class UserBNDetails extends StatefulWidget {
 class _UserBNDetailsState extends State<UserBNDetails>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
+
   @override
   void initState() {
     _animationController = AnimationController(
@@ -24,6 +28,15 @@ class _UserBNDetailsState extends State<UserBNDetails>
     );
     _animationController.repeat(reverse: true);
     super.initState();
+    _markBroadcastAsSeen();
+  }
+
+  void _markBroadcastAsSeen() async {
+    try {
+      await getUserBNDetails(widget.id);
+    } catch (e) {
+      debugPrint("Failed to mark broadcast as seen: $e");
+    }
   }
 
   @override
@@ -32,12 +45,11 @@ class _UserBNDetailsState extends State<UserBNDetails>
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: true,
-        child: Scaffold(
+      canPop: true,
+      child: Scaffold(
         backgroundColor: const Color(0xFFF5F7FB),
         appBar: AppBar(
           elevation: 0,
@@ -51,179 +63,170 @@ class _UserBNDetailsState extends State<UserBNDetails>
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: FutureBuilder<dynamic>(
-          future: getUserBNDetails(widget.id),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError) {
-                return errorWidgetDesign(context, snapshot.error.toString());
-              }
+        body: widget.broadcastData != null
+            ? _buildContent(widget.broadcastData)
+            : FutureBuilder<dynamic>(
+                future: getUserBNDetails(widget.id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasError) {
+                      return errorWidgetDesign(context, snapshot.error.toString());
+                    }
 
-              if (!snapshot.hasData ||
-                  snapshot.data['success'] != true ||
-                  snapshot.data['data'] == null) {
-                return dataNotAvailableWidgetDesign(context);
-              }
+                    if (!snapshot.hasData ||
+                        snapshot.data['success'] != true ||
+                        snapshot.data['data'] == null) {
+                      return dataNotAvailableWidgetDesign(context);
+                    }
 
-              final data = snapshot.data['data'];
+                    return _buildContent(snapshot.data['data']);
+                  }
 
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                      // Content Card
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.all(16),
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title Section
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                              ),
-                            ),
-                            child: Text(
-                              data['details']['title'],
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ),
+                  return _buildLoading();
+                },
+              ),
+      ),
+    );
+  }
 
-                          const SizedBox(height: 20),
-
-                          // Date & Time
-                          _buildInfoRow(
-                            icon: Icons.access_time_rounded,
-                            label: 'Date & Time',
-                            value: data['datetime'],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Message
-                          _buildInfoRow(
-                            icon: Icons.message_outlined,
-                            label: 'Message',
-                            value: data['details']['message'],
-                            isMultiline: true,
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Image Section
-                          if (data['image_url'] != null && data['image_url'] != '-')
-                            _buildImageSection(data['image_url']),
-                        ],
-                      ),
-                    ),
-                  ],
+  Widget _buildLoading() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-              );
-            }
-
-            // Loading State
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.1),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        RotationTransition(
-                          turns: Tween(begin: 0.0, end: 1.0).animate(
-                            CurvedAnimation(
-                              parent: _animationController,
-                              curve: Curves.linear,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.notifications_active_rounded,
-                            size: 48,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Loading Notification',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Please wait...',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
+              ],
+            ),
+            child: Column(
+              children: [
+                RotationTransition(
+                  turns: Tween(begin: 0.0, end: 1.0).animate(
+                    CurvedAnimation(
+                      parent: _animationController,
+                      curve: Curves.linear,
                     ),
                   ),
+                  child: Icon(
+                    Icons.notifications_active_rounded,
+                    size: 48,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Loading Notification',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Please wait...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(dynamic data) {
+    final title = (data is Map ? (data['details']?['title'] ?? data['title']) : null)?.toString() ?? 'Broadcast';
+    final message = (data is Map ? (data['details']?['message'] ?? data['message']) : null)?.toString() ?? '';
+    final dateTime = (data is Map ? (data['datetime'] ?? data['sys_date'] ?? data['created_at']) : null)?.toString() ?? '';
+    final imageUrl = data is Map ? (data['image_url'] ?? data['image'])?.toString() : null;
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title Section
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Date & Time
+                if (dateTime.isNotEmpty) ...[
+                  _buildInfoRow(
+                    icon: Icons.access_time_rounded,
+                    label: 'Date & Time',
+                    value: dateTime,
+                  ),
+                  const SizedBox(height: 16),
                 ],
-              ),
-            );
-          },
-        ),
+
+                // Message
+                _buildInfoRow(
+                  icon: Icons.message_outlined,
+                  label: 'Message',
+                  value: message,
+                  isMultiline: true,
+                ),
+
+                const SizedBox(height: 20),
+
+                // Image Section
+                if (imageUrl != null && imageUrl.isNotEmpty && imageUrl != '-')
+                  _buildImageSection(imageUrl),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  Widget textfeild(String str) {
-    return Text(
-      '\t\t\t\t\t\t\t\t$str\n',
-      style: TextStyle(
-        color: Theme.of(context).primaryColor,
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget textdata(String str) {
-    return Text(
-      // '\t\t\t\t'+
-      '$str\n',
-      style: TextStyle(color: Colors.black, fontSize: 15),
-    );
-  }
-
-
 
   Widget _buildInfoRow({
     required IconData icon,
@@ -298,7 +301,7 @@ class _UserBNDetailsState extends State<UserBNDetails>
               child: Icon(
                 Icons.image_rounded,
                 color: Theme.of(context).primaryColor,
-                size: 18,
+                size: 20,
               ),
             ),
             const SizedBox(width: 12),
@@ -306,84 +309,73 @@ class _UserBNDetailsState extends State<UserBNDetails>
               'Attached Image',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+        GestureDetector(
+          onTap: () {
+            if (imageUrl != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(
+                      backgroundColor: Colors.black,
+                      iconTheme: const IconThemeData(color: Colors.white),
+                    ),
+                    body: PhotoView(
+                      imageProvider: NetworkImage(imageUrl),
+                    ),
+                  ),
+                ),
+              );
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(maxHeight: 250),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
             ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: imageUrl == null || imageUrl == '-'
-                ? Container(
-                    color: Colors.grey[100],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    height: 150,
+                    alignment: Alignment.center,
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 150,
+                  color: Colors.grey[100],
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.image_not_supported_outlined,
-                          size: 40,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          imageUrl == null ? 'No Image' : 'Image Not Found',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Icon(Icons.broken_image_rounded, size: 40, color: Colors.grey[400]),
+                        const SizedBox(height: 8),
+                        Text('Image not available', style: TextStyle(color: Colors.grey[600])),
                       ],
                     ),
-                  )
-                : GestureDetector(
-                    onTap: () {
-                      dialogTriggerForImgView(context, imageUrl);
-                    },
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: 200,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        }
-                        return Container(
-                          color: Colors.grey[200],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[200],
-                          child: Center(
-                            child: Icon(
-                              Icons.broken_image_rounded,
-                              size: 40,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
                   ),
+                ),
+              ),
+            ),
           ),
         ),
       ],

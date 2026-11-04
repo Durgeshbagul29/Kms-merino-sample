@@ -372,11 +372,27 @@ class _BNDetailsState extends State<BNDetails> with TickerProviderStateMixin {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: FadeInImage.assetNetwork(
-                        placeholder: 'assets/giphy.gif',
-                        image: response['data']['image_url'],
+                      child: Image.network(
+                        response['data']['image_url'],
                         fit: BoxFit.contain,
                         width: MediaQuery.of(context).size.width,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                            child: Icon(
+                              Icons.broken_image_rounded,
+                              color: Colors.grey.shade400,
+                              size: 40,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

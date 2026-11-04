@@ -115,12 +115,18 @@ class ApiConfig {
   static String get viewUserBroadcastUrl => '$baseUrl$viewUserBroadcastEndpoint';
   static String get viewUserNotificationsUrl => '$baseUrl$viewUserNotificationsEndpoint';
   static String get deleteUserNotificationUrl => '$baseUrl$deleteUserNotificationEndpoint';
-  static String seenUserBroadcastNotfUrl(dynamic userId, dynamic id) =>
-      '$baseUrl$seenUserBroadcastNotfEndpoint/$userId/$id';
-  static String reviewUserSectionNotfUrl(dynamic userId, dynamic id) =>
-      '$baseUrl$reviewUserSectionNotfEndpoint/$userId/$id';
-  static String viewUserSectionNotfUrl(dynamic userId, dynamic id) =>
-      '$baseUrl$viewUserSectionNotfEndpoint/$userId/$id';
+  static String seenUserBroadcastNotfUrl(dynamic arg1, [dynamic arg2]) =>
+      arg2 != null
+          ? '$baseUrl$seenUserBroadcastNotfEndpoint/$arg2'
+          : '$baseUrl$seenUserBroadcastNotfEndpoint/$arg1';
+  static String reviewUserSectionNotfUrl(dynamic arg1, [dynamic arg2]) =>
+      arg2 != null
+          ? '$baseUrl$reviewUserSectionNotfEndpoint/$arg2'
+          : '$baseUrl$reviewUserSectionNotfEndpoint/$arg1';
+  static String viewUserSectionNotfUrl(dynamic arg1, [dynamic arg2]) =>
+      arg2 != null
+          ? '$baseUrl$viewUserSectionNotfEndpoint/$arg2'
+          : '$baseUrl$viewUserSectionNotfEndpoint/$arg1';
 
   // ===========================================================================
   // 3. Admin Module Endpoints

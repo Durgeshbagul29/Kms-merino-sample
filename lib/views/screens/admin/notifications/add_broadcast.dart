@@ -1,3 +1,4 @@
+import 'dart:convert';
 // ignore_for_file: prefer_const_constructors, prefer_final_fields, unnecessary_null_comparison, deprecated_member_use
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -43,7 +44,12 @@ class _AddBroadcastState extends State<AddBroadcast> with TickerProviderStateMix
 
   Future getImage(BuildContext context) async {
       // PickedFile image = await picker.getImage(source: ImageSource.gallery);
-      XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
       if (image != null) {
         setState(() {
           _image = File(image.path);
@@ -432,81 +438,84 @@ class _AddBroadcastState extends State<AddBroadcast> with TickerProviderStateMix
     );
   }
 
-  Future<void> uploadImage(BuildContext context, String token,int admin,String title,String msg,File? imageFile) async{
+  Future<void> uploadImage(BuildContext context, String token, int admin, String title, String msg, File? imageFile) async {
+    try {
+      var image = imageFile;
+      var uri = Uri.parse(ApiConfig.addBroadcastUrl);
+      var request = http.MultipartRequest("POST", uri);
 
-    var image = imageFile;
+      if (image != null) {
+        var multipartFile = await http.MultipartFile.fromPath(
+          "image",
+          image.path,
+          filename: basename(image.path),
+        );
+        request.files.add(multipartFile);
+      }
 
-    // var stream= http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
-    // var length= await imageFile.length();
-    var uri = Uri.parse(ApiConfig.addBroadcastUrl);
+      request.headers['Accept'] = 'application/json';
+      request.headers['Authorization'] = 'Bearer $token';
 
-    var request = http.MultipartRequest("POST", uri);
+      request.fields['title'] = title;
+      request.fields['message'] = msg;
+      request.fields['admin_id'] = admin.toString();
 
-    if(image != null){
-      var multipartFile = http.MultipartFile("image", File(image.path).readAsBytes().asStream(), File(image.path).lengthSync(),filename: basename(image.path));
+      var respond = await request.send().timeout(const Duration(seconds: 45));
+      final respStr = await respond.stream.bytesToString();
+      CustomLoader.hide();
 
-      request.files.add(multipartFile);
+      if (respond.statusCode == 200) {
+        debugPrint("Image Uploaded");
+        debugPrint(respStr.toString());
+        dynamic decoded;
+        try {
+          decoded = json.decode(respStr);
+        } catch (_) {}
+
+        if (decoded is Map && decoded['success'] == false) {
+          String msg = decoded['message']?.toString() ?? 'Failed to add broadcast';
+          if (context.mounted) {
+            dialogBoxForFailure(context, msg, '', title: 'Broadcast Notice');
+          }
+        } else {
+          if (context.mounted) {
+            dialogBoxForSuccess(context, 'Data Added Successfully', AdminNotification());
+          }
+        }
+      } else {
+        debugPrint("Upload Failed: ${respond.statusCode}");
+        debugPrint(respStr.toString());
+        String failureTitle = 'Notice';
+        String failureMessage = 'Server returned status ${respond.statusCode}';
+        try {
+          final decoded = json.decode(respStr);
+          if (decoded is Map) {
+            if (decoded['message'] != null && decoded['message'].toString().trim().isNotEmpty) {
+              failureMessage = decoded['message'].toString().trim();
+            } else if (decoded['data'] != null && decoded['data']['error'] != null) {
+              failureMessage = decoded['data']['error'].toString().trim();
+            }
+          }
+        } catch (_) {}
+
+        if (failureMessage.toLowerCase().contains('limit')) {
+          failureTitle = 'Broadcast Limit';
+        }
+
+        if (context.mounted) {
+          dialogBoxForFailure(context, failureMessage, '', title: failureTitle);
+        }
+      }
+    } catch (e) {
+      CustomLoader.hide();
+      debugPrint("Upload Exception: $e");
+      if (context.mounted) {
+        dialogBoxForFailure(
+          context,
+          'Upload Failed',
+          'Could not upload broadcast. Please check image size or internet connection.',
+        );
+      }
     }
-
-    // request.headers['Content-Type'] = 'multipart/form-data';
-    request.headers['Authorization'] = 'Bearer $token';
-    // request.headers['Enctype'] = 'multipart/form-data';
-
-    
-    request.fields['title'] = title;
-    request.fields['message'] = msg;
-    request.fields['admin_id'] = admin.toString();
-
-    // var response = await request.send();
-    // var responseData = await response.stream.toBytes();
-    // var result = String.fromCharCodes(responseData);
-    // debugPrint(result);
-
-    // debugPrint(request.files.toString());
-    // request.files.forEach((element) {
-    //   debugPrint(element.filename);
-    // });
-
-    var respond = await request.send();
-    final respStr = await respond.stream.bytesToString();
-    if(respond.statusCode==200){
-      CustomLoader.hide();
-      debugPrint("Image Uploaded");
-      debugPrint(respStr.toString());
-      dialogBoxForSuccess(context,'Data Added Successfully',AdminNotification());
-    }else{
-      CustomLoader.hide();
-      debugPrint("Upload Failed");
-      debugPrint(respStr.toString());
-      CustomLoader.hide();
-      dialogBoxForFailure(context,'Something Went Wrong','Data Not Added');
-    }
-
-    // var stream = http.ByteStream(DelegatingStream.typed(_image.openRead()));
-    //   // get file length
-    //   var length = await _image.length();
-
-    //   // string to uri
-    //   var uri = Uri.parse(ApiConfig.addBroadcastUrl);
-
-    //   // create multipart request
-    //   var request = http.MultipartRequest("POST", uri);
-
-    //   // multipart that takes file
-    //   var multipartFile = http.MultipartFile('file', stream, length,
-    //       filename: basename(_image.path));
-
-    //   // add file to multipart
-    //   request.files.add(multipartFile);
-
-    //   // send
-    //   var response = await request.send();
-    //   debugPrint(response.statusCode);
-
-    //   // listen for response
-    //   response.stream.transform(utf8.decoder).listen((value) {
-    //     debugPrint(value);
-    //   });
   }
-
 }

@@ -64,7 +64,7 @@ class _EthicsScreenState extends State<EthicsScreen>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top : false,
+      top: false,
       child: Scaffold(
         backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
@@ -115,7 +115,8 @@ class _EthicsScreenState extends State<EthicsScreen>
                     } else {
                       return NoDataWidget(
                         title: 'No complaints found',
-                        subtitle: 'There are currently no complaints to review.',
+                        subtitle:
+                            'There are currently no complaints to review.',
                         icon: Iconsax.judge,
                       );
                     }
@@ -178,7 +179,9 @@ class _EthicsScreenState extends State<EthicsScreen>
                     Container(
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
@@ -193,7 +196,9 @@ class _EthicsScreenState extends State<EthicsScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            complaint['username'] ?? complaint['name'] ?? 'Unknown User',
+                            complaint['username'] ??
+                                complaint['name'] ??
+                                'Unknown User',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -203,7 +208,7 @@ class _EthicsScreenState extends State<EthicsScreen>
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '${complaint['complaint_id'] ?? ''} â€¢ ${complaint['date'] ?? 'N/A'}',
+                            '${complaint['complaint_id'] ?? ''} ¢ ${complaint['date'] ?? 'N/A'}',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -220,7 +225,9 @@ class _EthicsScreenState extends State<EthicsScreen>
                       decoration: BoxDecoration(
                         color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: statusColor.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         isPending ? 'Pending' : 'Reviewed',

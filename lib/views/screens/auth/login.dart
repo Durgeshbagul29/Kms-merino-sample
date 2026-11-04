@@ -155,7 +155,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
                       children: [
                         SizedBox(height: screenHeight * 0.07),
 
-                        // â”€â”€ Header Section â”€â”€
+                        //  Header Section
                         FadeTransition(
                           opacity: _fadeAnimation,
                           child: Column(
@@ -218,7 +218,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
 
                         const SizedBox(height: 28),
 
-                        // â”€â”€ Login Card â”€â”€
+                        //  Login Card
                         SlideTransition(
                           position: _slideAnimation,
                           child: FadeTransition(
@@ -285,7 +285,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
 
                                             const SizedBox(height: 22),
 
-                                            // â”€â”€ Username Field â”€â”€
+                                            //  Username Field
                                             _buildLabel('Username', labelColor),
                                             const SizedBox(height: 7),
                                             TextFormField(
@@ -314,7 +314,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
 
                                             const SizedBox(height: 18),
 
-                                            // â”€â”€ Password Field â”€â”€
+                                            //  Password Field
                                             _buildLabel('Password', labelColor),
                                             const SizedBox(height: 7),
                                             TextFormField(
@@ -370,7 +370,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
 
                                             const SizedBox(height: 26),
 
-                                            // â”€â”€ Login Button â”€â”€
+                                            //  Login Button
                                             SizedBox(
                                               height: 48,
                                               child: ElevatedButton(
@@ -502,12 +502,19 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
                                                       }
                                                     } else {
                                                       CustomLoader.hide();
-                                                      String displayError = responseModel.message;
-                                                      if (displayError.toLowerCase().contains('unauthori')) {
-                                                        displayError = 'Account not found or invalid credentials. Please check your username/email and password.';
+                                                      String displayError =
+                                                          responseModel.message;
+                                                      if (displayError
+                                                          .toLowerCase()
+                                                          .contains(
+                                                            'unauthori',
+                                                          )) {
+                                                        displayError =
+                                                            'Account not found or invalid credentials. Please check your username/email and password.';
                                                       }
                                                       setState(
-                                                        () => error = displayError,
+                                                        () => error =
+                                                            displayError,
                                                       );
                                                     }
                                                   }
@@ -536,7 +543,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
                                               ),
                                             ),
 
-                                            // â”€â”€ Error Message â”€â”€
+                                            //  Error Message
                                             AnimatedSwitcher(
                                               duration: const Duration(
                                                 milliseconds: 400,

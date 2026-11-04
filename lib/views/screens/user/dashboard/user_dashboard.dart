@@ -123,7 +123,7 @@ class _UserDashboardState extends State<UserDashboard>
       backgroundColor: Theme.of(context).primaryColor,
       automaticallyImplyLeading: false,
       title: const Text(
-        'KMS',
+        'Merino KMS',
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,

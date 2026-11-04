@@ -540,33 +540,39 @@ Future<dynamic> getUserBNDetails(int id) async {
     };
   }
 
-  final token = await LoggedInUser.getToken();
-  final userid = await LoggedInUser.getUserId();
+  try {
+    final token = await LoggedInUser.getToken();
 
-  debugPrint('Using base URL for seen_user_broadcast_notf: ${ApiConfig.baseUrl}');
-  String url = ApiConfig.seenUserBroadcastNotfUrl(userid, id);
-  final response = await get(
-    Uri.parse(url),
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-      'Authorization': 'Bearer $token',
-    },
-  );
-  var responsebody = json.decode(response.body);
-  debugPrint(responsebody.toString());
+    debugPrint('Using base URL for seen_user_broadcast_notf: ${ApiConfig.baseUrl}');
+    String url = ApiConfig.seenUserBroadcastNotfUrl(id);
+    final response = await get(
+      Uri.parse(url),
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-  // return responsebody['data'];
-  if (responsebody['success'] == true) {
-    // Fixed the comparison operator
-    debugPrint("success is true");
-    debugPrint(responsebody['message'].toString());
-  } else {
-    debugPrint("success is false");
-    debugPrint(responsebody['message'].toString());
+    if (response.statusCode == 200) {
+      var responsebody = json.decode(response.body);
+      return responsebody;
+    } else {
+      debugPrint("seen_user_broadcast_notf returned ${response.statusCode}: ${response.body}");
+      return {
+        'success': false,
+        'message': 'Server returned status ${response.statusCode}',
+        'data': null,
+      };
+    }
+  } catch (e) {
+    debugPrint("Error in getUserBNDetails: $e");
+    return {
+      'success': false,
+      'message': e.toString(),
+      'data': null,
+    };
   }
-
-  return responsebody;
 }
 
 Future<dynamic> getUserKaizenDetails(int id) async {
@@ -778,10 +784,9 @@ Future<void> reviewSectionNotification(BuildContext context, int id, Widget file
   }
 
   final token = await LoggedInUser.getToken();
-  final userid = await LoggedInUser.getUserId();
 
   debugPrint('Using base URL for review_user_section_notf: ${ApiConfig.baseUrl}');
-  String url = ApiConfig.reviewUserSectionNotfUrl(userid, id);
+  String url = ApiConfig.reviewUserSectionNotfUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -793,50 +798,61 @@ Future<void> reviewSectionNotification(BuildContext context, int id, Widget file
   var responsebody = json.decode(response.body);
   debugPrint(responsebody.toString());
 
-  // dialogBoxForNotficication(context,responsebody['data'],filename);
-  var data = responsebody['data'];
-  if (data['notf']['category_id'] == 1) {
-    if (data['notf']['subcategory_id'] == 1) {
+  if (responsebody != null && responsebody['success'] == true && responsebody['data'] != null) {
+    var data = responsebody['data'];
+    var notf = data['notf'] ?? data;
+    var categoryId = notf['category_id'];
+    var subcategoryId = notf['subcategory_id'];
+    var recordId = notf['record_id'];
+
+    if (categoryId == 1) {
+      if (subcategoryId == 1) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                UserAccidentDetails(recordId, filename),
+          ),
+        );
+      } else if (subcategoryId == 2) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                UserNearmissDetails(recordId, filename),
+          ),
+        );
+      } else if (subcategoryId == 3) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                UserObservationDetails(recordId, filename),
+          ),
+        );
+      }
+    } else if (categoryId == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
-              UserAccidentDetails(data['notf']['record_id'], filename),
+              UserKaizenDetails(recordId, filename),
         ),
       );
-    } else if (data['notf']['subcategory_id'] == 2) {
+    } else {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
-              UserNearmissDetails(data['notf']['record_id'], filename),
-        ),
-      );
-    } else if (data['notf']['subcategory_id'] == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              UserObservationDetails(data['notf']['record_id'], filename),
+              EthicsComplaintDetails(complaint: data['records'] ?? notf),
         ),
       );
     }
-  } else if (data['notf']['category_id'] == 2) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            UserKaizenDetails(data['notf']['record_id'], filename),
-      ),
-    );
   } else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            EthicsComplaintDetails(complaint: data['records']),
-      ),
-    );
+    debugPrint("Notification review failed or returned empty data");
+    if (context.mounted) {
+      dialogBoxForFailure(context, 'Notice', responsebody?['message'] ?? 'Unable to open notification');
+    }
   }
 }
 
@@ -850,10 +866,9 @@ Future<void> viewSectionNotification(BuildContext context, int id, Widget filena
   }
 
   final token = await LoggedInUser.getToken();
-  final userid = await LoggedInUser.getUserId();
 
   debugPrint('Using base URL for view_user_section_notf: ${ApiConfig.baseUrl}');
-  String url = ApiConfig.viewUserSectionNotfUrl(userid, id);
+  String url = ApiConfig.viewUserSectionNotfUrl(id);
   final response = await get(
     Uri.parse(url),
     headers: {
@@ -865,49 +880,61 @@ Future<void> viewSectionNotification(BuildContext context, int id, Widget filena
   var responsebody = json.decode(response.body);
   debugPrint(responsebody.toString());
 
-  var data = responsebody['data'];
-  if (data['notf']['category_id'] == 1) {
-    if (data['notf']['subcategory_id'] == 1) {
+  if (responsebody != null && responsebody['success'] == true && responsebody['data'] != null) {
+    var data = responsebody['data'];
+    var notf = data['notf'] ?? data;
+    var categoryId = notf['category_id'];
+    var subcategoryId = notf['subcategory_id'];
+    var recordId = notf['record_id'];
+
+    if (categoryId == 1) {
+      if (subcategoryId == 1) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                UserAccidentDetails(recordId, filename),
+          ),
+        );
+      } else if (subcategoryId == 2) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                UserNearmissDetails(recordId, filename),
+          ),
+        );
+      } else if (subcategoryId == 3) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                UserObservationDetails(recordId, filename),
+          ),
+        );
+      }
+    } else if (categoryId == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
-              UserAccidentDetails(data['notf']['record_id'], filename),
+              UserKaizenDetails(recordId, filename),
         ),
       );
-    } else if (data['notf']['subcategory_id'] == 2) {
+    } else {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) =>
-              UserNearmissDetails(data['notf']['record_id'], filename),
-        ),
-      );
-    } else if (data['notf']['subcategory_id'] == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              UserObservationDetails(data['notf']['record_id'], filename),
+              EthicsComplaintDetails(complaint: data['records'] ?? notf),
         ),
       );
     }
-  } else if (data['notf']['category_id'] == 2) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            UserKaizenDetails(data['notf']['record_id'], filename),
-      ),
-    );
   } else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            EthicsComplaintDetails(complaint: data['records']),
-      ),
-    );
+    debugPrint("Notification view failed or returned empty data");
+    if (context.mounted) {
+      dialogBoxForFailure(context, 'Notice', responsebody?['message'] ?? 'Unable to open notification');
+    }
   }
 }
 

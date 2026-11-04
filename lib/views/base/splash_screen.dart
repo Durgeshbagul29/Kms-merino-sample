@@ -118,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               SizedBox(height: 30),
               Text(
-                'KMS',
+                'Merino KMS',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,

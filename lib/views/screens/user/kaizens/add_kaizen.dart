@@ -31,7 +31,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
   File? _image;
   File? _video;
   bool _isPickingImage = false;
-  bool _isPickingVideo = false;
+  // bool _isPickingVideo = false;
   bool _isSubmitting = false;
   final picker = ImagePicker();
 
@@ -78,7 +78,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
 
   Future getVideo(BuildContext context) async {
     setState(() {
-      _isPickingVideo = true;
+      // _isPickingVideo = true;
     });
     try {
       XFile? video = await picker.pickVideo(source: ImageSource.gallery);
@@ -94,7 +94,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
       }
     } finally {
       setState(() {
-        _isPickingVideo = false;
+        // _isPickingVideo = false;
       });
     }
   }

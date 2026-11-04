@@ -54,8 +54,8 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: true,
-        child: SafeArea(
+      canPop: true,
+      child: SafeArea(
         top: false,
         child: Scaffold(
           backgroundColor: Colors.grey.shade50,
@@ -132,7 +132,9 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
               if (widget.kaizenId != null)
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: IconButton(
@@ -473,10 +475,14 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
                   child: Container(
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                      color: Theme.of(
+                        context,
+                      ).primaryColor.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -1558,7 +1564,7 @@ class _MyFormState extends State<_MyForm> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        // Validated Cost Savings field â€” only for approve
+                        // Validated Cost Savings field ” only for approve
                         if (isApprove) ...[
                           SizedBox(height: 16),
                           TextFormField(
@@ -1744,9 +1750,7 @@ class _MyFormState extends State<_MyForm> {
                                         await LoggedInUser.getUserId();
 
                                     final response = await post(
-                                      Uri.parse(
-                                        ApiConfig.updateAdminKaizenUrl,
-                                      ),
+                                      Uri.parse(ApiConfig.updateAdminKaizenUrl),
                                       headers: {
                                         "Accept": "application/json",
                                         'Content-Type': 'application/json',

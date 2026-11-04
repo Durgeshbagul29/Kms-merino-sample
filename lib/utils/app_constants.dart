@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
 class AppConstants {
-  static const String APP_NAME = 'KMS';
+  static const String APP_NAME = 'Merino KMS';
 
   // Shared Keys
   static const String TOKEN = 'token';

@@ -295,7 +295,7 @@ class NotificationService {
       // If both are still missing, provide a generic fallback if there's any data
       if ((title == null || title.isEmpty) && (body == null || body.isEmpty)) {
         if (message.data.isNotEmpty) {
-          title = "KMS Merino";
+          title = "Merino KMS";
           body = "You have a new notification";
         } else {
           debugPrint("⚠️ Skipping local notification: No title/body or data found.");

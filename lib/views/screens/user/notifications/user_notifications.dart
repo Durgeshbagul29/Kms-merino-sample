@@ -362,7 +362,10 @@ class _AdminBroadcastState extends State<UserNotification>
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) => UserBNDetails(
-                                                    br["id"], UserNotification())));
+                                                    br["id"],
+                                                    UserNotification(),
+                                                    broadcastData: br,
+                                                )));
                                       },
                                     ),
                                   );
