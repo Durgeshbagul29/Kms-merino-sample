@@ -1,3 +1,6 @@
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 // ignore_for_file: prefer_const_constructors, prefer_final_fields, unnecessary_null_comparison, deprecated_member_use
 import 'dart:io';
@@ -438,6 +441,56 @@ class _AddBroadcastState extends State<AddBroadcast> with TickerProviderStateMix
     );
   }
 
+  /// Compresses the image using hardware-accelerated codec down to max 1080px maintaining aspect ratio
+  Future<File> _compressImage(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final originalSize = bytes.lengthInBytes;
+      debugPrint('Original image size: ${(originalSize / 1024).toStringAsFixed(1)} KB');
+
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
+      final int origWidth = descriptor.width;
+      final int origHeight = descriptor.height;
+      descriptor.dispose();
+      buffer.dispose();
+
+      int? targetWidth;
+      int? targetHeight;
+      if (origWidth > 1080 || origHeight > 1080) {
+        if (origWidth >= origHeight) {
+          targetWidth = 1080;
+        } else {
+          targetHeight = 1080;
+        }
+      }
+
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        bytes,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      final ui.Image image = frameInfo.image;
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+      if (byteData != null) {
+        final compressedBytes = byteData.buffer.asUint8List();
+        final compressedSize = compressedBytes.lengthInBytes;
+        debugPrint('Compressed image size: ${(compressedSize / 1024).toStringAsFixed(1)} KB');
+
+        final tempDir = await getTemporaryDirectory();
+        final String newPath = '${tempDir.path}/broadcast_${DateTime.now().millisecondsSinceEpoch}.png';
+        final compressedFile = File(newPath);
+        await compressedFile.writeAsBytes(compressedBytes);
+        return compressedFile;
+      }
+    } catch (e) {
+      debugPrint('Image compression error (falling back to original): $e');
+    }
+    return file;
+  }
+
   Future<void> uploadImage(BuildContext context, String token, int admin, String title, String msg, File? imageFile) async {
     try {
       var image = imageFile;
@@ -445,15 +498,17 @@ class _AddBroadcastState extends State<AddBroadcast> with TickerProviderStateMix
       var request = http.MultipartRequest("POST", uri);
 
       if (image != null) {
+        File fileToUpload = await _compressImage(image);
         var multipartFile = await http.MultipartFile.fromPath(
           "image",
-          image.path,
-          filename: basename(image.path),
+          fileToUpload.path,
+          filename: basename(fileToUpload.path),
         );
         request.files.add(multipartFile);
       }
 
       request.headers['Accept'] = 'application/json';
+      request.headers['X-Requested-With'] = 'XMLHttpRequest';
       request.headers['Authorization'] = 'Bearer $token';
 
       request.fields['title'] = title;
@@ -487,16 +542,23 @@ class _AddBroadcastState extends State<AddBroadcast> with TickerProviderStateMix
         debugPrint(respStr.toString());
         String failureTitle = 'Notice';
         String failureMessage = 'Server returned status ${respond.statusCode}';
+        dynamic decoded;
         try {
-          final decoded = json.decode(respStr);
-          if (decoded is Map) {
-            if (decoded['message'] != null && decoded['message'].toString().trim().isNotEmpty) {
-              failureMessage = decoded['message'].toString().trim();
-            } else if (decoded['data'] != null && decoded['data']['error'] != null) {
-              failureMessage = decoded['data']['error'].toString().trim();
-            }
-          }
+          decoded = json.decode(respStr);
         } catch (_) {}
+
+        if (respond.statusCode == 401 || respond.statusCode == 403) {
+          failureTitle = 'Session Expired';
+          failureMessage = 'Your session has expired or is unauthorized. Please log in again.';
+        } else if (decoded is Map) {
+          if (decoded['message'] != null && decoded['message'].toString().trim().isNotEmpty) {
+            failureMessage = decoded['message'].toString().trim();
+          } else if (decoded['data'] != null && decoded['data']['error'] != null) {
+            failureMessage = decoded['data']['error'].toString().trim();
+          }
+        } else if (respStr.trim().startsWith('<')) {
+          failureMessage = 'Server returned an invalid redirect. Please log in again or try later.';
+        }
 
         if (failureMessage.toLowerCase().contains('limit')) {
           failureTitle = 'Broadcast Limit';

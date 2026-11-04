@@ -1,3 +1,7 @@
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
+import 'dart:convert';
 // ignore_for_file: prefer_const_constructors, prefer_final_fields, unnecessary_null_comparison, deprecated_member_use
 
 import 'dart:io';
@@ -42,7 +46,12 @@ class _ManagerAddBroadcastState extends State<ManagerAddBroadcast>
   }
 
   Future getImage() async {
-    XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+      maxWidth: 1920,
+      maxHeight: 1920,
+    );
     if (image != null) {
       setState(() {
         _image = File(image.path);
@@ -409,6 +418,56 @@ class _ManagerAddBroadcastState extends State<ManagerAddBroadcast>
     );
   }
 
+  /// Compresses the image using hardware-accelerated codec down to max 1080px maintaining aspect ratio
+  Future<File> _compressImage(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final originalSize = bytes.lengthInBytes;
+      debugPrint('Original image size: ${(originalSize / 1024).toStringAsFixed(1)} KB');
+
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
+      final int origWidth = descriptor.width;
+      final int origHeight = descriptor.height;
+      descriptor.dispose();
+      buffer.dispose();
+
+      int? targetWidth;
+      int? targetHeight;
+      if (origWidth > 1080 || origHeight > 1080) {
+        if (origWidth >= origHeight) {
+          targetWidth = 1080;
+        } else {
+          targetHeight = 1080;
+        }
+      }
+
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        bytes,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      final ui.Image image = frameInfo.image;
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+      if (byteData != null) {
+        final compressedBytes = byteData.buffer.asUint8List();
+        final compressedSize = compressedBytes.lengthInBytes;
+        debugPrint('Compressed image size: ${(compressedSize / 1024).toStringAsFixed(1)} KB');
+
+        final tempDir = await getTemporaryDirectory();
+        final String newPath = '${tempDir.path}/broadcast_${DateTime.now().millisecondsSinceEpoch}.png';
+        final compressedFile = File(newPath);
+        await compressedFile.writeAsBytes(compressedBytes);
+        return compressedFile;
+      }
+    } catch (e) {
+      debugPrint('Image compression error (falling back to original): $e');
+    }
+    return file;
+  }
+
   Future<void> _uploadBroadcast(
     BuildContext context,
     String token,
@@ -420,43 +479,81 @@ class _ManagerAddBroadcastState extends State<ManagerAddBroadcast>
     var uri = Uri.parse(ApiConfig.addManagerBroadcastUrl);
     var request = http.MultipartRequest('POST', uri);
 
+    request.headers['Accept'] = 'application/json';
+    request.headers['X-Requested-With'] = 'XMLHttpRequest';
     request.headers['Authorization'] = 'Bearer $token';
     request.fields['title'] = title;
     request.fields['message'] = msg;
     request.fields['manager_id'] = managerId.toString();
 
     if (imageFile != null) {
-      var multipartFile = http.MultipartFile(
+      File fileToUpload = await _compressImage(imageFile);
+      var multipartFile = await http.MultipartFile.fromPath(
         'image',
-        File(imageFile.path).readAsBytes().asStream(),
-        File(imageFile.path).lengthSync(),
-        filename: basename(imageFile.path),
+        fileToUpload.path,
+        filename: basename(fileToUpload.path),
       );
       request.files.add(multipartFile);
     }
 
     try {
-      var response = await request.send();
+      var response = await request.send().timeout(const Duration(seconds: 45));
       final respStr = await response.stream.bytesToString();
       CustomLoader.hide();
-      if (response.statusCode == 200) {
+
+      dynamic decoded;
+      try {
+        decoded = json.decode(respStr);
+      } catch (_) {}
+
+      if (response.statusCode == 200 && (decoded is! Map || decoded['success'] != false)) {
         debugPrint('Broadcast sent: $respStr');
-        // Return true to signal the list should refresh
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Broadcast sent successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (context.mounted) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Broadcast sent successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } else {
-        debugPrint('Broadcast failed: $respStr');
-        dialogBoxForFailure(context, 'Something Went Wrong', 'Data Not Added');
+        debugPrint('Broadcast failed (${response.statusCode}): $respStr');
+        String failureTitle = 'Notice';
+        String failureMessage = 'Data Not Added';
+
+        if (response.statusCode == 401 || response.statusCode == 403) {
+          failureTitle = 'Session Expired';
+          failureMessage = 'Your session has expired or is unauthorized. Please log in again.';
+        } else if (decoded is Map) {
+          if (decoded['message'] != null && decoded['message'].toString().trim().isNotEmpty) {
+            failureMessage = decoded['message'].toString().trim();
+          } else if (decoded['data'] != null && decoded['data']['error'] != null) {
+            failureMessage = decoded['data']['error'].toString().trim();
+          }
+        } else if (respStr.trim().startsWith('<')) {
+          failureMessage = 'Server returned an invalid redirect. Please log in again or try later.';
+        } else if (response.statusCode != 200) {
+          failureMessage = 'Server returned status ${response.statusCode}';
+        }
+
+        if (failureMessage.toLowerCase().contains('limit')) {
+          failureTitle = 'Broadcast Limit';
+        }
+        if (context.mounted) {
+          dialogBoxForFailure(context, failureMessage, '', title: failureTitle);
+        }
       }
     } catch (e) {
       CustomLoader.hide();
       debugPrint('Error sending broadcast: $e');
-      dialogBoxForFailure(context, 'Error', e.toString());
+      if (context.mounted) {
+        dialogBoxForFailure(
+          context,
+          'Upload Failed',
+          'Could not upload broadcast. Please check image size or internet connection.',
+        );
+      }
     }
   }
 }
