@@ -471,7 +471,7 @@ class CommonToast {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       borderRadius: 14,
       backgroundColor: backgroundColor,
-      borderColor: Colors.white.withOpacity(0.18),
+      borderColor: Colors.white.withValues(alpha: 0.18),
       borderWidth: 1.0,
       duration: duration,
       animationDuration: const Duration(milliseconds: 320),
@@ -481,13 +481,13 @@ class CommonToast {
       dismissDirection: DismissDirection.down,
       boxShadows: [
         BoxShadow(
-          color: shadowColor.withOpacity(0.32),
+          color: shadowColor.withValues(alpha: 0.32),
           blurRadius: 18,
           offset: const Offset(0, 4),
           spreadRadius: 1,
         ),
         BoxShadow(
-          color: Colors.black.withOpacity(0.14),
+          color: Colors.black.withValues(alpha: 0.14),
           blurRadius: 8,
           offset: const Offset(0, 3),
         ),
@@ -510,7 +510,7 @@ class CommonToast {
           fontFamily: 'Outfit',
           fontSize: 13,
           fontWeight: hasTitle ? FontWeight.w400 : FontWeight.w500,
-          color: Colors.white.withOpacity(0.95),
+          color: Colors.white.withValues(alpha: 0.95),
           height: 1.35,
         ),
         softWrap: true,
@@ -530,7 +530,7 @@ class CommonToast {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.16),
+                    color: Colors.white.withValues(alpha: 0.16),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(

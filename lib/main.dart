@@ -134,15 +134,6 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-class _OriginalHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    final client = super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-    return GlobalAuthInterceptorHttpClient(client);
-  }
-}
 
 
 
