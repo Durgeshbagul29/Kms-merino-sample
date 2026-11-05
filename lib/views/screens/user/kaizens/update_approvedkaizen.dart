@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:kmsmerino/views/common/video_compressor.dart';
+import 'package:kmsmerino/views/common/image_compressor.dart';
 
 class UpdateApprovedKaizen extends StatefulWidget {
   final int dataid, subcategoryid;
@@ -58,11 +59,25 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
       _isPickingImage = true;
     });
     try {
-      XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
       if (image != null) {
-        setState(() {
-          _image = File(image.path);
-        });
+        File file = File(image.path);
+        file = await ImageCompressor.processAndValidateImage(context, file);
+        if (await ImageCompressor.isSizeValid(file)) {
+          setState(() {
+            _image = file;
+          });
+        } else {
+          CommonToast.warning(
+            'Image size exceeds 8MB limit. Please select a smaller image.',
+            title: 'File Size Limit',
+          );
+        }
       }
     } finally {
       setState(() {
@@ -280,7 +295,8 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
 
                     SizedBox(height: 24),
 
-                    // After Video Upload Section
+                    /*
+                    // After Video Upload Section (Commented out)
                     Text(
                       'After Video (Optional)',
                       style: TextStyle(
@@ -370,6 +386,7 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
                     ),
 
                     SizedBox(height: 24),
+                    */
 
                     Text(
                       'Improvements*',
@@ -411,10 +428,10 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
                       child: ElevatedButton(
                         onPressed: () async {
                           if (_formKey.currentState!.validate()){
-                            if (_video != null) {
-                              _video = await VideoCompressor.compressVideoWithLoader(context, _video);
-                              if (_video == null) return;
-                            }
+                            // if (_video != null) {
+                            //   _video = await VideoCompressor.compressVideoWithLoader(context, _video);
+                            //   if (_video == null) return;
+                            // }
                             CustomLoader.show(context,
                               progressIndicator: CircularProgressIndicator(backgroundColor: Theme.of(context).primaryColor),
                               loaderText: Text("\nProcessing your request...", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black, decoration: TextDecoration.none), textAlign: TextAlign.center));
@@ -424,6 +441,14 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
 
                             if (!mounted) return;
                             if(_image != null){
+                              if (!await ImageCompressor.isSizeValid(_image!)) {
+                                CustomLoader.hide();
+                                CommonToast.warning(
+                                  'Image size exceeds 8MB limit. Please select a smaller image.',
+                                  title: 'File Size Limit',
+                                );
+                                return;
+                              }
                               String ext = extension(_image!.path).toLowerCase();
                               if(ext == '.jpeg' || ext == '.jpg' || ext == '.png'){
                                 uploadImage(context, token, userid, improvement, _image, _video);
@@ -469,10 +494,12 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
       request.files.add(multipartFile);
     }
 
+    /*
     if (videoFile != null) {
       var multipartFile = http.MultipartFile("after_video", videoFile.readAsBytes().asStream(), videoFile.lengthSync(), filename: basename(videoFile.path));
       request.files.add(multipartFile);
     }
+    */
 
     request.headers['Authorization'] = 'Bearer $token';
     request.fields['improvement'] = improvedata;
@@ -488,6 +515,7 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
         var jsonResponse = json.decode(respStr);
         if (!mounted) return;
         VideoCompressor.cleanCache();
+        ImageCompressor.cleanCache();
         if (jsonResponse['success'] == true) {
           dialogBoxForSuccess(context, 'Data Updated Successfully', UserSubmittedKaizens());
         } else {
@@ -496,11 +524,13 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
       } else {
         if (!mounted) return;
         VideoCompressor.cleanCache();
+        ImageCompressor.cleanCache();
         dialogBoxForFailure(context, 'Something Went Wrong', 'Error code: ${respond.statusCode}');
       }
     } catch (e) {
       if (!mounted) return;
       VideoCompressor.cleanCache();
+        ImageCompressor.cleanCache();
       CustomLoader.hide();
       dialogBoxForFailure(context, 'Network Error', 'Check your connection');
     }

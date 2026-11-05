@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:kmsmerino/services/api/api_client.dart';
@@ -61,6 +64,46 @@ void main() {
     test('ApiClient.notifyError forwards properly to CommonToast', () {
       final response = Response(statusCode: 500, statusText: 'Server Error');
       expect(() => ApiClient.notifyError(response), returnsNormally);
+    });
+  });
+
+  group('CommonToast Network Error Handling Tests', () {
+    test('handleNetworkError handles TimeoutException as Server Timeout', () {
+      expect(() => CommonToast.handleNetworkError(TimeoutException('Request timed out')), returnsNormally);
+    });
+
+    test('handleNetworkError handles SocketException: Broken pipe as Connection Interrupted', () {
+      const socketException = SocketException('Broken pipe', osError: OSError('Broken pipe', 32));
+      expect(() => CommonToast.handleNetworkError(socketException), returnsNormally);
+    });
+
+    test('handleNetworkError handles ClientException with Broken pipe', () {
+      final clientException = http.ClientException('ClientException with SocketException: Broken pipe (OS Error: Broken pipe, errno = 32)');
+      expect(() => CommonToast.handleNetworkError(clientException), returnsNormally);
+    });
+
+    test('handleNetworkError handles Connection reset', () {
+      const resetException = SocketException('Connection reset by peer', osError: OSError('Connection reset by peer', 104));
+      expect(() => CommonToast.handleNetworkError(resetException), returnsNormally);
+    });
+
+    test('handleNetworkError handles HandshakeException as Security Error', () {
+      expect(() => CommonToast.handleNetworkError(const HandshakeException('Certificate validation failed')), returnsNormally);
+    });
+
+    test('handleNetworkError handles failed host lookup as No Internet', () {
+      const noInternetException = SocketException('Failed host lookup: kmsmerino.abraca-dabra.com');
+      expect(() => CommonToast.handleNetworkError(noInternetException), returnsNormally);
+    });
+
+    test('handleApiError handles 413 Payload Too Large', () {
+      final response413 = Response(statusCode: 413, statusText: 'Payload Too Large');
+      expect(() => CommonToast.handleApiError(response413), returnsNormally);
+    });
+
+    test('handleApiError delegates exceptions to handleNetworkError', () {
+      final exception = http.ClientException('Connection reset');
+      expect(() => CommonToast.handleApiError(exception), returnsNormally);
     });
   });
 

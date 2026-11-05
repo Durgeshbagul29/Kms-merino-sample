@@ -11,6 +11,8 @@ import 'package:kmsmerino/views/screens/user/kaizens/user_submittedkaizens.dart'
 import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
+import 'package:kmsmerino/views/common/image_compressor.dart';
 
 class UpdatePendingKaizen extends StatefulWidget {
   final int dataid, support, subcategoryid;
@@ -66,12 +68,25 @@ class _UpdatePendingKaizenState extends State<UpdatePendingKaizen>
   }
 
   Future getImage(BuildContext context) async {
-    // PickedFile image = await picker.getImage(source: ImageSource.gallery);
-    XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1920,
+      maxHeight: 1920,
+    );
     if (image != null) {
-      setState(() {
-        _image = File(image.path);
-      });
+      File file = File(image.path);
+      file = await ImageCompressor.processAndValidateImage(context, file);
+      if (await ImageCompressor.isSizeValid(file)) {
+        setState(() {
+          _image = file;
+        });
+      } else {
+        CommonToast.warning(
+          'Image size exceeds 8MB limit. Please select a smaller image.',
+          title: 'File Size Limit',
+        );
+      }
     }
   }
 
@@ -719,6 +734,14 @@ class _UpdatePendingKaizenState extends State<UpdatePendingKaizen>
                             final userid = await LoggedInUser.getUserId();
 
                             if (_image != null) {
+                              if (!await ImageCompressor.isSizeValid(_image!)) {
+                                CustomLoader.hide();
+                                CommonToast.warning(
+                                  'Image size exceeds 8MB limit. Please select a smaller image.',
+                                  title: 'File Size Limit',
+                                );
+                                return;
+                              }
                               String ext = extension(_image!.path);
                               debugPrint(ext);
 
@@ -895,6 +918,7 @@ class _UpdatePendingKaizenState extends State<UpdatePendingKaizen>
     var respond = await request.send();
     final respStr = await respond.stream.bytesToString();
     if (respond.statusCode == 200) {
+      ImageCompressor.cleanCache();
       CustomLoader.hide();
       debugPrint("Image Uploaded");
       debugPrint(respStr.toString());

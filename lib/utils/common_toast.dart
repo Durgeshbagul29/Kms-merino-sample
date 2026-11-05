@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +16,7 @@ enum ToastType {
 /// Features:
 /// - Floating bottom-positioned notification with generous safe bottom margins.
 /// - Rounded corners (14px) with subtle elevation & shadows.
-/// - Distinct status icon and theme colors for Success, Error, Warning, Info.
+/// - Distinct theme colors for Success, Error, Warning, Info.
 /// - Smooth slide-up, fade-in, and fade-out animations.
 /// - Automatic dismissal (default 3s) with manual close icon and swipe-to-dismiss.
 /// - Deduplication against concurrent spam / duplicate API failures.
@@ -107,6 +109,118 @@ class CommonToast {
     } catch (_) {}
   }
 
+  /// Centralized network exception and error handler.
+  /// Categorizes network failures (SocketException, ClientException, Broken pipe,
+  /// Connection reset, timeouts, SSL errors, offline states) into accurate, user-friendly toasts.
+  static void handleNetworkError(dynamic error, {String? fallbackMessage}) {
+    if (error == null) {
+      CommonToast.error(
+        fallbackMessage ?? 'Unable to connect to server. Please check your internet connection.',
+        title: 'Connection Error',
+      );
+      return;
+    }
+
+    final String errorStr = error.toString().toLowerCase();
+
+    // 1. Connection / Request Timeouts (TimeoutException, connection timeout, receive timeout)
+    if (error is TimeoutException ||
+        errorStr.contains('timeout') ||
+        errorStr.contains('timed out') ||
+        errorStr.contains('time out')) {
+      CommonToast.error(
+        'Server is taking too long to respond.',
+        title: 'Server Timeout',
+      );
+      return;
+    }
+
+    // 2. Broken pipe, Connection reset, Connection closed/aborted (OS Error: Broken pipe, errno = 32 / 104 / 54 / 10054)
+    if (errorStr.contains('broken pipe') ||
+        errorStr.contains('connection reset') ||
+        errorStr.contains('connection closed') ||
+        errorStr.contains('connection aborted') ||
+        errorStr.contains('errno = 32') ||
+        errorStr.contains('errno = 104') ||
+        errorStr.contains('errno = 54') ||
+        errorStr.contains('errno = 10054')) {
+      CommonToast.error(
+        'Connection interrupted. Please try again.',
+        title: 'Connection Interrupted',
+      );
+      return;
+    }
+
+    // 3. SSL / Certificate / Handshake exceptions
+    if (error is HandshakeException ||
+        errorStr.contains('handshake') ||
+        errorStr.contains('certificate') ||
+        errorStr.contains('ssl') ||
+        errorStr.contains('tls')) {
+      CommonToast.error(
+        'Secure connection failed. Please check your network or date/time settings.',
+        title: 'Security Error',
+      );
+      return;
+    }
+
+    // 4. SocketException & No Internet Connection
+    if (error is SocketException ||
+        errorStr.contains('socketexception') ||
+        errorStr.contains('failed host lookup') ||
+        errorStr.contains('no address associated') ||
+        errorStr.contains('network is unreachable') ||
+        errorStr.contains('network unreachable') ||
+        errorStr.contains('no route to host') ||
+        errorStr.contains('no internet') ||
+        errorStr.contains('errno = 7') ||
+        errorStr.contains('errno = 101') ||
+        errorStr.contains('errno = 110') ||
+        errorStr.contains('errno = 113') ||
+        errorStr.contains('errno = 10051') ||
+        errorStr.contains('errno = 10060') ||
+        errorStr.contains('errno = 10065')) {
+      CommonToast.error(
+        'Please check your internet connection.',
+        title: 'No Internet',
+      );
+      return;
+    }
+
+    // 5. ClientException (package:http)
+    if (errorStr.contains('clientexception')) {
+      if (errorStr.contains('broken pipe') ||
+          errorStr.contains('reset') ||
+          errorStr.contains('closed') ||
+          errorStr.contains('aborted')) {
+        CommonToast.error(
+          'Connection interrupted. Please try again.',
+          title: 'Connection Interrupted',
+        );
+        return;
+      } else if (errorStr.contains('failed host lookup') ||
+          errorStr.contains('network') ||
+          errorStr.contains('no address')) {
+        CommonToast.error(
+          'Please check your internet connection.',
+          title: 'No Internet',
+        );
+        return;
+      }
+      CommonToast.error(
+        fallbackMessage ?? 'Connection interrupted. Please try again.',
+        title: 'Connection Error',
+      );
+      return;
+    }
+
+    // 6. Generic Network Fallback
+    CommonToast.error(
+      fallbackMessage ?? 'Connection interrupted. Please try again.',
+      title: 'Connection Error',
+    );
+  }
+
   /// Centralized API error response handler.
   /// Parses standard HTTP status codes, Dio/package:http/GetConnect responses,
   /// and shows appropriate floating toast notifications.
@@ -120,6 +234,12 @@ class CommonToast {
         fallbackMessage ?? 'Unable to connect to server. Please check your internet connection.',
         title: 'Connection Error',
       );
+      return;
+    }
+
+    // Direct delegation if an exception or error is passed
+    if (response is Exception || response is Error) {
+      handleNetworkError(response, fallbackMessage: fallbackMessage);
       return;
     }
 
@@ -137,12 +257,50 @@ class CommonToast {
       statusText = response['statusText']?.toString();
     }
 
-    // Network / Connection Error (statusCode 0 or 1, or offline message)
+    // Connection Timeout / Gateway Timeout (408, 504)
+    if (statusCode == 408 || statusCode == 504) {
+      error(
+        'Server is taking too long to respond.',
+        title: 'Server Timeout',
+      );
+      return;
+    }
+
+    // Payload Too Large (413)
+    if (statusCode == 413) {
+      error(
+        'Selected file size is too large for the server. Please choose a smaller file.',
+        title: 'File Too Large',
+      );
+      return;
+    }
+
+    // Network / Connection Error (statusCode 0 or 1, or offline / broken pipe message)
     if (statusCode == 0 ||
         statusCode == 1 ||
-        (statusText != null && statusText.toLowerCase().contains('internet'))) {
+        (statusText != null &&
+            (statusText.toLowerCase().contains('internet') ||
+             statusText.toLowerCase().contains('broken pipe') ||
+             statusText.toLowerCase().contains('connection')))) {
+      if (statusText != null &&
+          (statusText.toLowerCase().contains('broken pipe') ||
+           statusText.toLowerCase().contains('connection reset') ||
+           statusText.toLowerCase().contains('connection interrupted'))) {
+        error(
+          'Connection interrupted. Please try again.',
+          title: 'Connection Interrupted',
+        );
+        return;
+      }
+      if (statusText != null && statusText.toLowerCase().contains('timeout')) {
+        error(
+          'Server is taking too long to respond.',
+          title: 'Server Timeout',
+        );
+        return;
+      }
       error(
-        'Please check your internet connection and try again.',
+        'Please check your internet connection.',
         title: 'Connection Error',
       );
       return;
@@ -277,38 +435,28 @@ class CommonToast {
     } catch (_) {}
 
     final Color backgroundColor;
-    final Color iconContainerColor;
     final Color shadowColor;
-    final IconData iconData;
     final String defaultTitle;
 
     switch (type) {
       case ToastType.success:
         backgroundColor = const Color(0xFF15803D); // Vibrant emerald/green
-        iconContainerColor = const Color(0xFF166534); // Darker green circle
         shadowColor = const Color(0xFF15803D);
-        iconData = Icons.check_circle_rounded;
         defaultTitle = 'Success';
         break;
       case ToastType.error:
         backgroundColor = const Color(0xFFDC2626); // Crimson red
-        iconContainerColor = const Color(0xFF991B1B); // Darker red circle
         shadowColor = const Color(0xFFDC2626);
-        iconData = Icons.error_rounded;
         defaultTitle = 'Error';
         break;
       case ToastType.warning:
         backgroundColor = const Color(0xFFD97706); // Amber / orange
-        iconContainerColor = const Color(0xFFB45309); // Darker amber circle
         shadowColor = const Color(0xFFD97706);
-        iconData = Icons.warning_amber_rounded;
         defaultTitle = 'Warning';
         break;
       case ToastType.info:
         backgroundColor = const Color(0xFF2563EB); // Royal blue
-        iconContainerColor = const Color(0xFF1D4ED8); // Darker blue circle
         shadowColor = const Color(0xFF2563EB);
-        iconData = Icons.info_outline_rounded;
         defaultTitle = 'Information';
         break;
     }
@@ -344,24 +492,6 @@ class CommonToast {
           offset: const Offset(0, 3),
         ),
       ],
-      icon: Container(
-        width: 38,
-        height: 38,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: iconContainerColor,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
-          ),
-        ),
-        child: Icon(
-          iconData,
-          color: Colors.white,
-          size: 22,
-        ),
-      ),
       titleText: hasTitle
           ? Text(
               effectiveTitle,

@@ -1,5 +1,6 @@
 // ignore_for_file: library_prefixes
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -53,6 +54,27 @@ class ApiClient extends GetxService {
     };
   }
 
+  String _parseNetworkErrorMessage(dynamic e) {
+    final String errorStr = e.toString().toLowerCase();
+    if (e is TimeoutException || errorStr.contains('timeout') || errorStr.contains('timed out')) {
+      return 'Server is taking too long to respond.';
+    }
+    if (errorStr.contains('broken pipe') ||
+        errorStr.contains('connection reset') ||
+        errorStr.contains('connection closed') ||
+        errorStr.contains('errno = 32') ||
+        errorStr.contains('errno = 104')) {
+      return 'Connection interrupted. Please try again.';
+    }
+    if (e is HandshakeException || errorStr.contains('handshake') || errorStr.contains('certificate')) {
+      return 'Secure connection failed. Please check your network or date/time settings.';
+    }
+    if (e is SocketException || errorStr.contains('socketexception') || errorStr.contains('failed host lookup')) {
+      return 'Please check your internet connection.';
+    }
+    return noInternetMessage;
+  }
+
   Future<Response> getData(String uri, {Map<String, String>? headers}) async {
     try {
       debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
@@ -72,7 +94,7 @@ class ApiClient extends GetxService {
       return handleResponse(response, uri);
     } catch (e) {
       debugPrint('====> API Error: $e');
-      return Response(statusCode: 1, statusText: noInternetMessage);
+      return Response(statusCode: 1, statusText: _parseNetworkErrorMessage(e));
     }
   }
 
@@ -97,11 +119,12 @@ class ApiClient extends GetxService {
       return handleResponse(response, uri);
     } catch (e) {
       debugPrint('====> API Error: $e');
-      return Response(statusCode: 1, statusText: noInternetMessage);
+      return Response(statusCode: 1, statusText: _parseNetworkErrorMessage(e));
     }
   }
 
   Future<Response> postMultipartData(String uri, Map<String, String> body, List<MultipartBody> multipartBody, {Map<String, String>? headers}) async {
+    final Http.Client client = Http.Client();
     try {
       debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
       debugPrint('====> API Body: $body');
@@ -115,6 +138,7 @@ class ApiClient extends GetxService {
       }
       
       Http.MultipartRequest request = Http.MultipartRequest('POST', Uri.parse(fullUri));
+      request.headers['Connection'] = 'close';
       request.headers.addAll(headers ?? _mainHeaders);
       for(MultipartBody multipart in multipartBody) {
         if(Foundation.kIsWeb) {
@@ -126,17 +150,29 @@ class ApiClient extends GetxService {
           request.files.add(part);
         }else {
           File file = File(multipart.file.path);
-          request.files.add(Http.MultipartFile(
-            multipart.key, file.readAsBytes().asStream(), file.lengthSync(), filename: file.path.split('/').last,
-          ));
+          if (await file.exists()) {
+            final String ext = extension(file.path).toLowerCase().replaceAll('.', '');
+            final MediaType mediaType = ext == 'png'
+                ? MediaType('image', 'png')
+                : (ext == 'webp' ? MediaType('image', 'webp') : MediaType('image', 'jpeg'));
+            request.files.add(await Http.MultipartFile.fromPath(
+              multipart.key,
+              file.path,
+              filename: basename(file.path),
+              contentType: mediaType,
+            ));
+          }
         }
       }
       request.fields.addAll(body);
-      Http.Response response = await Http.Response.fromStream(await request.send());
+      final streamedResponse = await client.send(request).timeout(Duration(seconds: timeoutInSeconds));
+      Http.Response response = await Http.Response.fromStream(streamedResponse).timeout(Duration(seconds: timeoutInSeconds));
       return handleResponse(response, uri);
     } catch (e) {
       debugPrint('====> API Error: $e');
-      return Response(statusCode: 1, statusText: noInternetMessage);
+      return Response(statusCode: 1, statusText: _parseNetworkErrorMessage(e));
+    } finally {
+      client.close();
     }
   }
 
@@ -161,7 +197,7 @@ class ApiClient extends GetxService {
       return handleResponse(response, uri);
     } catch (e) {
       debugPrint('====> API Error: $e');
-      return Response(statusCode: 1, statusText: noInternetMessage);
+      return Response(statusCode: 1, statusText: _parseNetworkErrorMessage(e));
     }
   }
 
@@ -186,7 +222,7 @@ class ApiClient extends GetxService {
       return handleResponse(response, uri);
     } catch (e) {
       debugPrint('====> API Error: $e');
-      return Response(statusCode: 1, statusText: noInternetMessage);
+      return Response(statusCode: 1, statusText: _parseNetworkErrorMessage(e));
     }
   }
 
@@ -209,7 +245,7 @@ class ApiClient extends GetxService {
       return handleResponse(response, uri);
     } catch (e) {
       debugPrint('====> API Error: $e');
-      return Response(statusCode: 1, statusText: noInternetMessage);
+      return Response(statusCode: 1, statusText: _parseNetworkErrorMessage(e));
     }
   }
 

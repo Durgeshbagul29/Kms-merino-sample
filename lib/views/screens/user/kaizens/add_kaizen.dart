@@ -1,8 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_final_fields, unnecessary_null_comparison, deprecated_member_use
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:kmsmerino/controller/auth_controller.dart';
+import 'package:kmsmerino/services/api/api_client.dart';
 import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,6 +18,7 @@ import 'package:path/path.dart';
 import 'package:kmsmerino/helper/network_connectivity_manager.dart';
 import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:kmsmerino/views/common/video_compressor.dart';
+import 'package:kmsmerino/views/common/image_compressor.dart';
 
 class AddKaizen extends StatefulWidget {
   final String type;
@@ -63,11 +68,25 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
       _isPickingImage = true;
     });
     try {
-      XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
       if (image != null) {
-        setState(() {
-          _image = File(image.path);
-        });
+        File file = File(image.path);
+        file = await ImageCompressor.processAndValidateImage(context, file);
+        if (await ImageCompressor.isSizeValid(file)) {
+          setState(() {
+            _image = file;
+          });
+        } else {
+          CommonToast.warning(
+            'Image size exceeds 8MB limit. Please select a smaller image.',
+            title: 'File Size Limit',
+          );
+        }
       }
     } finally {
       setState(() {
@@ -778,50 +797,78 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
+                          disabledBackgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.6),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                         ),
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            final networkManager = NetworkManager.instance;
-                            final isConnected = await networkManager.checkConnectivityAndShowError();
-                            if (!isConnected) return;
+                        onPressed: _isSubmitting
+                            ? null
+                            : () async {
+                                if (_isSubmitting) return;
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() => _isSubmitting = true);
+                                  final networkManager = NetworkManager.instance;
+                                  final isConnected = await networkManager.checkConnectivityAndShowError();
+                                  if (!isConnected) {
+                                    if (mounted) setState(() => _isSubmitting = false);
+                                    return;
+                                  }
 
-                            if (_video != null) {
-                              _video = await VideoCompressor.compressVideoWithLoader(context, _video);
-                              if (_video == null) return;
-                            }
+                                  // if (_video != null) {
+                                  //   _video = await VideoCompressor.compressVideoWithLoader(context, _video);
+                                  //   if (_video == null) {
+                                  //     if (mounted) setState(() => _isSubmitting = false);
+                                  //     return;
+                                  //   }
+                                  // }
 
-                            setState(() => _isSubmitting = true);
-                            CustomLoader.show(
-                              context,
-                              progressIndicator: CircularProgressIndicator(color: Theme.of(context).primaryColor),
-                              loaderText: Text("\nProcessing your request...", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black, decoration: TextDecoration.none), textAlign: TextAlign.center),
-                            );
+                                  CustomLoader.show(
+                                    context,
+                                    progressIndicator: CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                                    loaderText: Text("\nProcessing your request...", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black, decoration: TextDecoration.none), textAlign: TextAlign.center),
+                                  );
 
-                            final token = await LoggedInUser.getToken();
-                            final userid = await LoggedInUser.getUserId();
+                                  final token = await LoggedInUser.getToken();
+                                  final userid = await LoggedInUser.getUserId();
 
-                            if (_image != null) {
-                              String ext = extension(_image!.path).toLowerCase();
-                              if (ext == '.jpeg' || ext == '.jpg' || ext == '.png') {
-                                uploadImage(context, token, userid, problem, description, solution, support, _image, _video, kaizenCost);
-                              } else {
-                                CustomLoader.hide();
-                                setState(() => _isSubmitting = false);
-                                dialogBoxForFailure(context, 'Invalid Image Type', 'Valid image types are: jpeg, jpg, png');
-                              }
-                            } else {
-                              uploadImage(context, token, userid, problem, description, solution, support, _image, _video, kaizenCost);
-                            }
-                          }
-                        },
-                        child: Text(
-                          'Submit Kaizen',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-                        ),
+                                  if (_image != null) {
+                                    if (!await ImageCompressor.isSizeValid(_image!)) {
+                                      CustomLoader.hide();
+                                      if (mounted) setState(() => _isSubmitting = false);
+                                      CommonToast.warning(
+                                        'Image size exceeds 8MB limit. Please select a smaller image.',
+                                        title: 'File Size Limit',
+                                      );
+                                      return;
+                                    }
+                                    String ext = extension(_image!.path).toLowerCase();
+                                    if (ext == '.jpeg' || ext == '.jpg' || ext == '.png') {
+                                      uploadImage(context, token, userid, problem, description, solution, support, _image, _video, kaizenCost);
+                                    } else {
+                                      CustomLoader.hide();
+                                      if (mounted) setState(() => _isSubmitting = false);
+                                      dialogBoxForFailure(context, 'Invalid Image Type', 'Valid image types are: jpeg, jpg, png');
+                                    }
+                                  } else {
+                                    uploadImage(context, token, userid, problem, description, solution, support, _image, _video, kaizenCost);
+                                  }
+                                }
+                              },
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Text(
+                                'Submit Kaizen',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                              ),
                       ),
                     ),
                   ],
@@ -834,7 +881,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
     );
   }
 
-  void uploadImage(
+  Future<void> uploadImage(
     BuildContext context,
     String token,
     int user,
@@ -846,56 +893,94 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
     File? videoFile,
     String costdata,
   ) async {
-    String baseUrl = await getTenantBaseUrl();
-    var uri = Uri.parse("$baseUrl${ApiConfig.addKaizenRecordEndpoint}");
-    var request = http.MultipartRequest("POST", uri);
-
-    if (imageFile != null) {
-      try {
-        var multipartFile = http.MultipartFile(
-          "image",
-          imageFile.readAsBytes().asStream(),
-          imageFile.lengthSync(),
-          filename: basename(imageFile.path),
-        );
-        request.files.add(multipartFile);
-      } catch (e) {
-        debugPrint('ERROR adding image: $e');
-      }
-    }
-
-    if (videoFile != null) {
-      try {
-        var multipartFile = http.MultipartFile(
-          "before_video",
-          videoFile.readAsBytes().asStream(),
-          videoFile.lengthSync(),
-          filename: basename(videoFile.path),
-        );
-        request.files.add(multipartFile);
-      } catch (e) {
-        debugPrint('ERROR adding before video: $e');
-      }
-    }
-
-    request.headers['Authorization'] = 'Bearer $token';
-    request.headers['Accept'] = 'application/json';
-    request.fields['problem'] = problemdata;
-    request.fields['description'] = descdata;
-    request.fields['solution'] = soldata;
-    request.fields['support'] = supportdata;
-    request.fields['type'] = widget.type;
-    request.fields['cost_savings'] = costdata;
-    request.fields['user_id'] = user.toString();
-
+    final http.Client client = http.Client();
     try {
-      var respond = await request.send();
-      final respStr = await respond.stream.bytesToString();
-      debugPrint("add_kaizen_record statusCode: ${respond.statusCode}");
+      String baseUrl = await getTenantBaseUrl();
+      var uri = Uri.parse("$baseUrl${ApiConfig.addKaizenRecordEndpoint}");
+      var request = http.MultipartRequest("POST", uri);
+
+      // Connection: close prevents stale socket reuse and broken pipe race conditions on reverse proxy
+      request.headers['Connection'] = 'close';
+      request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Accept'] = 'application/json';
+
+      request.fields['problem'] = problemdata;
+      request.fields['description'] = descdata;
+      request.fields['solution'] = soldata;
+      request.fields['support'] = supportdata;
+      request.fields['type'] = widget.type;
+      request.fields['cost_savings'] = costdata;
+      request.fields['user_id'] = user.toString();
+
+      // Safely attach image with existence check and explicit MIME type
+      if (imageFile != null && await imageFile.exists()) {
+        try {
+          final String ext = extension(imageFile.path).toLowerCase().replaceAll('.', '');
+          final MediaType mediaType = ext == 'png'
+              ? MediaType('image', 'png')
+              : (ext == 'webp' ? MediaType('image', 'webp') : MediaType('image', 'jpeg'));
+
+          final multipartFile = await http.MultipartFile.fromPath(
+            'image',
+            imageFile.path,
+            filename: basename(imageFile.path),
+            contentType: mediaType,
+          );
+          request.files.add(multipartFile);
+        } catch (e) {
+          debugPrint('ERROR adding image: $e');
+        }
+      }
+
+      // Safely attach video with existence check and explicit MIME type
+      if (videoFile != null && await videoFile.exists()) {
+        try {
+          final String ext = extension(videoFile.path).toLowerCase().replaceAll('.', '');
+          final MediaType mediaType = MediaType('video', ext.isNotEmpty ? ext : 'mp4');
+
+          final multipartFile = await http.MultipartFile.fromPath(
+            'before_video',
+            videoFile.path,
+            filename: basename(videoFile.path),
+            contentType: mediaType,
+          );
+          request.files.add(multipartFile);
+        } catch (e) {
+          debugPrint('ERROR adding before video: $e');
+        }
+      }
+
+      // Send request with dedicated timeout (45s) for multipart upload
+      final streamedResponse = await client.send(request).timeout(const Duration(seconds: 45));
+      final response = await http.Response.fromStream(streamedResponse).timeout(const Duration(seconds: 45));
+      final respStr = response.body;
+
+      debugPrint("add_kaizen_record statusCode: ${response.statusCode}");
       debugPrint("add_kaizen_record response: $respStr");
 
-      setState(() => _isSubmitting = false);
       CustomLoader.hide();
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+
+      // 401 Session Expired handling
+      if (response.statusCode == 401 ||
+          ApiClient.isUnauthenticatedResponse(response.statusCode, respStr, uri: uri.toString())) {
+        AuthController.handleSessionExpiredGlobally();
+        CommonToast.error('Your session has expired. Please log in again.', title: 'Session Expired');
+        return;
+      }
+
+      // 413 Payload Too Large
+      if (response.statusCode == 413) {
+        VideoCompressor.cleanCache();
+          ImageCompressor.cleanCache();
+        CommonToast.error(
+          'The uploaded file is too large for the server. Please attach a smaller file.',
+          title: 'File Too Large',
+        );
+        return;
+      }
 
       dynamic jsonResponse;
       try {
@@ -904,7 +989,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
         debugPrint("Error decoding response JSON: $e");
       }
 
-      if (respond.statusCode == 200 && jsonResponse is Map && jsonResponse['success'] == true) {
+      if (response.statusCode == 200 && jsonResponse is Map && jsonResponse['success'] == true) {
         final data = jsonResponse['data'];
         if (data is Map && data['is_duplicate'] == true) {
           _showDuplicateDialog(
@@ -920,10 +1005,12 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
           );
         } else {
           VideoCompressor.cleanCache();
+          ImageCompressor.cleanCache();
           dialogBoxForSuccess(context, 'Data Added Successfully', UserViewKaizens(widget.type));
         }
       } else {
         VideoCompressor.cleanCache();
+          ImageCompressor.cleanCache();
         String errorMessage = 'Submission failed';
         if (jsonResponse is Map) {
           if (jsonResponse['message'] != null && jsonResponse['message'].toString().trim().isNotEmpty) {
@@ -954,18 +1041,33 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
           dialogTitle = 'Limit Reached';
         }
 
-        dialogBoxForFailure(
-          context,
-          errorMessage,
-          '',
-          title: dialogTitle,
-        );
+        if (response.statusCode >= 500) {
+          CommonToast.error('Internal server error occurred. Please try again later.', title: 'Server Error');
+        } else if (response.statusCode == 422) {
+          CommonToast.warning(errorMessage, title: 'Validation Error');
+        } else {
+          dialogBoxForFailure(
+            context,
+            errorMessage,
+            '',
+            title: dialogTitle,
+          );
+        }
       }
     } catch (e) {
       debugPrint("Error submitting kaizen: $e");
-      setState(() => _isSubmitting = false);
+      VideoCompressor.cleanCache();
+          ImageCompressor.cleanCache();
       CustomLoader.hide();
-      dialogBoxForFailure(context, 'Network Error', 'Check your connection');
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+      CommonToast.handleNetworkError(e);
+    } finally {
+      client.close();
+      if (mounted && _isSubmitting) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -1272,49 +1374,95 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
       loaderText: Text("\nSubmitting kaizen...", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black, decoration: TextDecoration.none), textAlign: TextAlign.center),
     );
 
-    final token = await LoggedInUser.getToken();
-    final userid = await LoggedInUser.getUserId();
-    String baseUrl = await getTenantBaseUrl();
-
-    var uri = Uri.parse("$baseUrl${ApiConfig.addKaizenRecordEndpoint}");
-    var request = http.MultipartRequest("POST", uri);
-
-    if (imageFile != null) {
-      try {
-        var multipartFile = http.MultipartFile("image", imageFile.readAsBytes().asStream(), imageFile.lengthSync(), filename: basename(imageFile.path));
-        request.files.add(multipartFile);
-      } catch (e) {
-        debugPrint('Error attaching image: $e');
-      }
-    }
-    if (videoFile != null) {
-      try {
-        var multipartFile = http.MultipartFile("before_video", videoFile.readAsBytes().asStream(), videoFile.lengthSync(), filename: basename(videoFile.path));
-        request.files.add(multipartFile);
-      } catch (e) {
-        debugPrint('Error attaching video: $e');
-      }
-    }
-
-    request.headers['Authorization'] = 'Bearer $token';
-    request.headers['Accept'] = 'application/json';
-    request.fields['problem'] = problemdata;
-    request.fields['description'] = descdata;
-    request.fields['solution'] = soldata;
-    request.fields['support'] = supportdata;
-    request.fields['type'] = widget.type;
-    request.fields['cost_savings'] = costdata;
-    request.fields['user_id'] = userid.toString();
-    request.fields['force_submit'] = 'true';
-
+    final http.Client client = http.Client();
     try {
-      var respond = await request.send();
-      final respStr = await respond.stream.bytesToString();
-      debugPrint("forceSubmit statusCode: ${respond.statusCode}");
+      final token = await LoggedInUser.getToken();
+      final userid = await LoggedInUser.getUserId();
+      String baseUrl = await getTenantBaseUrl();
+
+      var uri = Uri.parse("$baseUrl${ApiConfig.addKaizenRecordEndpoint}");
+      var request = http.MultipartRequest("POST", uri);
+
+      // Connection: close prevents stale socket reuse and broken pipe race conditions on reverse proxy
+      request.headers['Connection'] = 'close';
+      request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Accept'] = 'application/json';
+
+      request.fields['problem'] = problemdata;
+      request.fields['description'] = descdata;
+      request.fields['solution'] = soldata;
+      request.fields['support'] = supportdata;
+      request.fields['type'] = widget.type;
+      request.fields['cost_savings'] = costdata;
+      request.fields['user_id'] = userid.toString();
+      request.fields['force_submit'] = 'true';
+
+      if (imageFile != null && await imageFile.exists()) {
+        try {
+          final String ext = extension(imageFile.path).toLowerCase().replaceAll('.', '');
+          final MediaType mediaType = ext == 'png'
+              ? MediaType('image', 'png')
+              : (ext == 'webp' ? MediaType('image', 'webp') : MediaType('image', 'jpeg'));
+
+          final multipartFile = await http.MultipartFile.fromPath(
+            'image',
+            imageFile.path,
+            filename: basename(imageFile.path),
+            contentType: mediaType,
+          );
+          request.files.add(multipartFile);
+        } catch (e) {
+          debugPrint('Error attaching image: $e');
+        }
+      }
+
+      if (videoFile != null && await videoFile.exists()) {
+        try {
+          final String ext = extension(videoFile.path).toLowerCase().replaceAll('.', '');
+          final MediaType mediaType = MediaType('video', ext.isNotEmpty ? ext : 'mp4');
+
+          final multipartFile = await http.MultipartFile.fromPath(
+            'before_video',
+            videoFile.path,
+            filename: basename(videoFile.path),
+            contentType: mediaType,
+          );
+          request.files.add(multipartFile);
+        } catch (e) {
+          debugPrint('Error attaching video: $e');
+        }
+      }
+
+      final streamedResponse = await client.send(request).timeout(const Duration(seconds: 45));
+      final response = await http.Response.fromStream(streamedResponse).timeout(const Duration(seconds: 45));
+      final respStr = response.body;
+
+      debugPrint("forceSubmit statusCode: ${response.statusCode}");
       debugPrint("forceSubmit response: $respStr");
 
-      setState(() => _isSubmitting = false);
       CustomLoader.hide();
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+
+      // 401 Session Expired handling
+      if (response.statusCode == 401 ||
+          ApiClient.isUnauthenticatedResponse(response.statusCode, respStr, uri: uri.toString())) {
+        AuthController.handleSessionExpiredGlobally();
+        CommonToast.error('Your session has expired. Please log in again.', title: 'Session Expired');
+        return;
+      }
+
+      // 413 Payload Too Large
+      if (response.statusCode == 413) {
+        VideoCompressor.cleanCache();
+          ImageCompressor.cleanCache();
+        CommonToast.error(
+          'The uploaded file is too large for the server. Please attach a smaller file.',
+          title: 'File Too Large',
+        );
+        return;
+      }
 
       dynamic jsonResponse;
       try {
@@ -1323,11 +1471,13 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
         debugPrint("Error decoding response JSON: $e");
       }
 
-      if (respond.statusCode == 200 && jsonResponse is Map && jsonResponse['success'] == true) {
+      if (response.statusCode == 200 && jsonResponse is Map && jsonResponse['success'] == true) {
         VideoCompressor.cleanCache();
+          ImageCompressor.cleanCache();
         dialogBoxForSuccess(context, 'Data Added Successfully', UserViewKaizens(widget.type));
       } else {
         VideoCompressor.cleanCache();
+          ImageCompressor.cleanCache();
         String errorMessage = 'Submission failed';
         if (jsonResponse is Map) {
           if (jsonResponse['message'] != null && jsonResponse['message'].toString().trim().isNotEmpty) {
@@ -1358,23 +1508,34 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
           dialogTitle = 'Limit Reached';
         }
 
-        dialogBoxForFailure(
-          context,
-          errorMessage,
-          '',
-          title: dialogTitle,
-        );
+        if (response.statusCode >= 500) {
+          CommonToast.error('Internal server error occurred. Please try again later.', title: 'Server Error');
+        } else if (response.statusCode == 422) {
+          CommonToast.warning(errorMessage, title: 'Validation Error');
+        } else {
+          dialogBoxForFailure(
+            context,
+            errorMessage,
+            '',
+            title: dialogTitle,
+          );
+        }
       }
     } catch (e) {
       debugPrint("Error force submitting kaizen: $e");
       VideoCompressor.cleanCache();
-      setState(() => _isSubmitting = false);
+          ImageCompressor.cleanCache();
       CustomLoader.hide();
-      dialogBoxForFailure(
-        context,
-        'Network Error',
-        'Failed to connect to server. Please check your internet connection.',
-      );
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+      CommonToast.handleNetworkError(e);
+    } finally {
+      client.close();
+      if (mounted && _isSubmitting) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
+
 }
