@@ -286,7 +286,7 @@ class _UserBNDetailsState extends State<UserBNDetails>
     );
   }
 
-  Widget _buildImageSection(String? imageUrl) {
+  Widget _buildImageSection(String imageUrl) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -318,7 +318,6 @@ class _UserBNDetailsState extends State<UserBNDetails>
         const SizedBox(height: 12),
         GestureDetector(
           onTap: () {
-            if (imageUrl != null) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -333,7 +332,6 @@ class _UserBNDetailsState extends State<UserBNDetails>
                   ),
                 ),
               );
-            }
           },
           child: Container(
             width: double.infinity,
@@ -345,7 +343,7 @@ class _UserBNDetailsState extends State<UserBNDetails>
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                imageUrl!,
+                imageUrl,
                 fit: BoxFit.cover,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;

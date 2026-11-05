@@ -31,7 +31,7 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
   File? _image;
   File? _video;
   bool _isPickingImage = false;
-  bool _isPickingVideo = false;
+  // bool _isPickingVideo = false;
   final picker = ImagePicker();
 
   // Helper function to get tenant base URL
@@ -87,9 +87,9 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
   }
 
   Future getVideo(BuildContext context) async {
-    setState(() {
-      _isPickingVideo = true;
-    });
+    // setState(() {
+    //   _isPickingVideo = true;
+    // });
     try {
       XFile? video = await picker.pickVideo(source: ImageSource.gallery);
       if (video != null) {
@@ -103,9 +103,9 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
         });
       }
     } finally {
-      setState(() {
-        _isPickingVideo = false;
-      });
+      // setState(() {
+      //   _isPickingVideo = false;
+      // });
     }
   }
 
