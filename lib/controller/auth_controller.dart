@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kmsmerino/helper/route_helper.dart';
 import 'package:kmsmerino/services/api/api_client.dart';
 import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:kmsmerino/utils/app_constants.dart';
+import 'package:kmsmerino/views/base/custom_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:kmsmerino/models/response_model.dart';
@@ -17,6 +20,135 @@ class AuthController extends GetxController implements GetxService {
   bool _isLoading = false;
 
   bool get isLoading => _isLoading;
+
+  /// Global flag to track if an automatic or manual logout is currently in progress.
+  /// Prevents duplicate logout execution, redundant SharedPreferences writes,
+  /// and repeated navigation / snackbars when multiple APIs fail with 401 concurrently.
+  static bool _isLoggingOut = false;
+  static bool get isLoggingOut => _isLoggingOut;
+
+  /// Timestamp to debounce and prevent spamming user-facing notifications.
+  static DateTime? _lastExpiredNoticeTime;
+
+  /// Centralized handler for handling expired sessions / HTTP 401 / Laravel Unauthenticated responses.
+  /// Can be invoked safely from anywhere (ApiClient, HTTP Interceptors, controllers, or background tasks).
+  static Future<void> handleSessionExpiredGlobally({String? message}) async {
+    if (_isLoggingOut) {
+      debugPrint('🔒 [AUTH] Logout already in progress. Ignoring duplicate trigger.');
+      return;
+    }
+    _isLoggingOut = true;
+    debugPrint('🔒 [AUTH] Global automatic logout initiated due to 401 / Unauthenticated response.');
+
+    try {
+      // 1. Immediately invalidate the session in SharedPreferences
+      SharedPreferences prefs;
+      if (Get.isRegistered<SharedPreferences>()) {
+        prefs = Get.find<SharedPreferences>();
+      } else {
+        prefs = await SharedPreferences.getInstance();
+      }
+
+      await prefs.remove(AppConstants.TOKEN);
+      await prefs.remove(AppConstants.STATUS);
+      await prefs.remove('logstatus');
+      await prefs.remove(AppConstants.ROLE_ID);
+      await prefs.remove(AppConstants.USER_ID);
+      await prefs.remove(AppConstants.NAME);
+      await prefs.remove(AppConstants.USER_NAME);
+      await prefs.remove(AppConstants.EMAIL);
+      await prefs.remove(AppConstants.DEPT_NAME);
+      await prefs.reload();
+
+      // 2. Clear API client headers
+      if (Get.isRegistered<ApiClient>()) {
+        Get.find<ApiClient>().clearHeader();
+      }
+
+      // 3. Dismiss any active loaders, dialogs, or bottom sheets
+      CustomLoader.hide();
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      if (Get.isBottomSheetOpen ?? false) {
+        Get.back();
+      }
+
+      // 4. Reset loading state if AuthController is currently registered
+      if (Get.isRegistered<AuthController>()) {
+        final authController = Get.find<AuthController>();
+        authController._isLoading = false;
+        authController.update();
+      }
+
+      // 5. Navigate to Login screen and clear entire navigation stack
+      final targetRoute = RouteHelper.signIn;
+      if (Get.currentRoute != targetRoute) {
+        debugPrint('🚀 [AUTH] Resetting navigation stack and routing to: $targetRoute');
+        Get.offAllNamed(targetRoute);
+      }
+
+      // 6. Display user-friendly message once
+      final now = DateTime.now();
+      if (_lastExpiredNoticeTime == null ||
+          now.difference(_lastExpiredNoticeTime!) > const Duration(seconds: 4)) {
+        _lastExpiredNoticeTime = now;
+        final noticeText = message ?? 'Your session has expired. Please log in again.';
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showSessionExpiredNotice(noticeText);
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ [AUTH] Error during global session expiration handling: $e');
+    } finally {
+      // Allow future legitimate logouts after navigation has settled on login screen
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        _isLoggingOut = false;
+      });
+    }
+  }
+
+  /// Displays the user-friendly expiration notice using ScaffoldMessenger or Get.snackbar safely.
+  static void _showSessionExpiredNotice(String message) {
+    try {
+      final BuildContext? context = Get.context ?? Get.overlayContext;
+      final messenger = context != null ? ScaffoldMessenger.maybeOf(context) : null;
+      if (messenger != null) {
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
+            ),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else {
+        Get.snackbar(
+          'Session Expired',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade700,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.lock_outline_rounded, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      debugPrint('⚠️ [AUTH] Could not show session expired notification: $e');
+    }
+  }
 
   Future<ResponseModel> login(String username, String password) async {
     _isLoading = true;
@@ -179,9 +311,9 @@ class AuthController extends GetxController implements GetxService {
 
   bool isLoggedIn() {
     bool hasToken = sharedPreferences.containsKey(AppConstants.TOKEN);
-    debugPrint("Checking if token exists in SharedPreferences: $hasToken");
-    debugPrint("Token value: ${sharedPreferences.getString(AppConstants.TOKEN)}");
-    return hasToken;
+    String? token = sharedPreferences.getString(AppConstants.TOKEN);
+    bool logStatus = sharedPreferences.getBool('logstatus') ?? false;
+    return hasToken && token != null && token.isNotEmpty && logStatus;
   }
 
   bool clearSharedData() {
@@ -194,6 +326,7 @@ class AuthController extends GetxController implements GetxService {
     sharedPreferences.remove(AppConstants.ROLE_ID);
     sharedPreferences.remove(AppConstants.STATUS);
     sharedPreferences.remove('logstatus');
+    apiClient.clearHeader();
     return true;
   }
 

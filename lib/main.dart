@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:kmsmerino/bindings/general_bindings.dart';
 import 'package:kmsmerino/helper/route_helper.dart';
+import 'package:kmsmerino/services/api/global_auth_interceptor.dart';
 import 'package:kmsmerino/utils/app_constants.dart';
 import 'package:kmsmerino/utils/app_theme.dart';
 import 'package:kmsmerino/helper/get_di.dart' as di;
@@ -126,8 +127,22 @@ class MyApp extends StatelessWidget {
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
+    final client = super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
+    return GlobalAuthInterceptorHttpClient(client);
   }
 }
+
+class _OriginalHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    final client = super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+    return GlobalAuthInterceptorHttpClient(client);
+  }
+}
+
+
+

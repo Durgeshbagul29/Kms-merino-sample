@@ -3,18 +3,19 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:get/get_connect/http/src/request/request.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:flutter/foundation.dart' as Foundation;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
+import 'package:http/http.dart' as Http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kmsmerino/controller/auth_controller.dart';
 import 'package:kmsmerino/models/error_response.dart';
 import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:kmsmerino/utils/app_constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart';
-import 'package:flutter/foundation.dart' as Foundation;
-import 'package:http/http.dart' as Http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient extends GetxService {
 
@@ -42,6 +43,12 @@ class ApiClient extends GetxService {
     _mainHeaders = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $token'
+    };
+  }
+
+  void clearHeader() {
+    _mainHeaders = {
+      'Content-Type': 'application/json; charset=UTF-8',
     };
   }
 
@@ -157,6 +164,31 @@ class ApiClient extends GetxService {
     }
   }
 
+  Future<Response> patchData(String uri, dynamic body, {Map<String, String>? headers}) async {
+    try {
+      debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
+      debugPrint('====> API Body: $body');
+      
+      // Build the full URI
+      String fullUri;
+      if (uri.startsWith('http://') || uri.startsWith('https://')) {
+        fullUri = uri; // Use the absolute URL as-is
+      } else {
+        fullUri = ApiConfig.baseUrl + uri; // Concatenate with appropriate base URL
+      }
+      
+      Http.Response response = await Http.patch(
+        Uri.parse(fullUri),
+        body: jsonEncode(body),
+        headers: headers ?? _mainHeaders,
+      ).timeout(Duration(seconds: timeoutInSeconds));
+      return handleResponse(response, uri);
+    } catch (e) {
+      debugPrint('====> API Error: $e');
+      return Response(statusCode: 1, statusText: noInternetMessage);
+    }
+  }
+
   Future<Response> deleteData(String uri, {Map<String, String>? headers}) async {
     try {
       debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
@@ -180,6 +212,54 @@ class ApiClient extends GetxService {
     }
   }
 
+  /// Determines if an HTTP response represents an unauthenticated/expired session.
+  /// Explicitly excludes the login endpoint so failed credentials show error messages
+  /// without triggering an automatic logout loop.
+  static bool isUnauthenticatedResponse(int? statusCode, dynamic body, {String? uri}) {
+    if (uri != null && uri.contains(ApiConfig.loginEndpoint)) {
+      return false;
+    }
+
+    // 1. Direct HTTP 401 Unauthorized status code
+    if (statusCode == 401) {
+      return true;
+    }
+
+    // 2. Response body inspection for Laravel's standard Unauthenticated message
+    if (body != null) {
+      if (body is Map) {
+        final message = body['message']?.toString().trim();
+        if (message != null &&
+            (message == 'Unauthenticated.' ||
+             message == 'Unauthenticated' ||
+             message.toLowerCase() == 'unauthenticated.' ||
+             message.toLowerCase() == 'unauthenticated')) {
+          return true;
+        }
+        final error = body['error']?.toString().trim();
+        if (error != null &&
+            (error == 'Unauthenticated.' ||
+             error == 'Unauthenticated' ||
+             error.toLowerCase() == 'unauthenticated.' ||
+             error.toLowerCase() == 'unauthenticated')) {
+          return true;
+        }
+      } else if (body is String) {
+        final trimmed = body.trim();
+        if (trimmed.contains('"message":"Unauthenticated."') ||
+            trimmed.contains('"message": "Unauthenticated."') ||
+            trimmed.contains('"message":"Unauthenticated"') ||
+            trimmed.contains('"message": "Unauthenticated"') ||
+            trimmed.contains('"message":"unauthenticated."') ||
+            trimmed.contains('"message": "unauthenticated."')) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   Response handleResponse(Http.Response response, String uri) {
     dynamic body;
     try {
@@ -192,6 +272,20 @@ class ApiClient extends GetxService {
       request: Request(headers: response.request!.headers, method: response.request!.method, url: response.request!.url),
       headers: response.headers, statusCode: response.statusCode, statusText: response.reasonPhrase,
     );
+
+    // Global centralized detection for HTTP 401 / Laravel Unauthenticated responses
+    if (isUnauthenticatedResponse(response0.statusCode, response0.body, uri: uri)) {
+      debugPrint('🚨 [ApiClient] Detected 401 / Unauthenticated response on $uri');
+      AuthController.handleSessionExpiredGlobally();
+      return Response(
+        statusCode: 401,
+        body: response0.body,
+        statusText: 'Your session has expired. Please log in again.',
+        request: response0.request,
+        headers: response0.headers,
+      );
+    }
+
     if(response0.statusCode != 200 && response0.body != null && response0.body is !String) {
       if(response0.body.toString().startsWith('{errors: [{code:')) {
         ErrorResponse errorResponse = ErrorResponse.fromJson(response0.body);
