@@ -11,7 +11,7 @@ import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:kmsmerino/views/base/custom_snackbar.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:kmsmerino/views/common/video_compressor.dart';
 
 class UpdateApprovedKaizen extends StatefulWidget {
@@ -80,7 +80,7 @@ class _UpdateApprovedKaizenState extends State<UpdateApprovedKaizen> with Ticker
       if (video != null) {
         File file = File(video.path);
         if (!await VideoCompressor.isSizeValid(file)) {
-          showCustomSnackBar('Video size exceeds 50MB limit', isError: true);
+          CommonToast.warning('Video size exceeds 50MB limit', title: 'File Size Limit');
           return;
         }
         setState(() {

@@ -5,6 +5,7 @@ import 'package:kmsmerino/helper/route_helper.dart';
 import 'package:kmsmerino/services/api/api_client.dart';
 import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:kmsmerino/utils/app_constants.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:kmsmerino/views/base/custom_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,7 +24,7 @@ class AuthController extends GetxController implements GetxService {
 
   /// Global flag to track if an automatic or manual logout is currently in progress.
   /// Prevents duplicate logout execution, redundant SharedPreferences writes,
-  /// and repeated navigation / snackbars when multiple APIs fail with 401 concurrently.
+  /// and repeated navigation / toasts when multiple APIs fail with 401 concurrently.
   static bool _isLoggingOut = false;
   static bool get isLoggingOut => _isLoggingOut;
 
@@ -108,43 +109,14 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
-  /// Displays the user-friendly expiration notice using ScaffoldMessenger or Get.snackbar safely.
+  /// Displays the user-friendly expiration notice using centralized CommonToast safely.
   static void _showSessionExpiredNotice(String message) {
     try {
-      final BuildContext? context = Get.context ?? Get.overlayContext;
-      final messenger = context != null ? ScaffoldMessenger.maybeOf(context) : null;
-      if (messenger != null) {
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              message,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-      } else {
-        Get.snackbar(
-          'Session Expired',
-          message,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade700,
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 4),
-          icon: const Icon(Icons.lock_outline_rounded, color: Colors.white),
-        );
-      }
+      CommonToast.error(
+        message,
+        title: 'Session Expired',
+        duration: const Duration(seconds: 4),
+      );
     } catch (e) {
       debugPrint('⚠️ [AUTH] Could not show session expired notification: $e');
     }

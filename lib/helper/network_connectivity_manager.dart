@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:kmsmerino/views/base/no_internet_screen.dart';
 
 /// ---------------------------------------------------------------------------
@@ -37,13 +38,6 @@ class NetworkManager extends GetxController {
     _connectionStatus.value = result;
 
     if (result == ConnectivityResult.none) {
-      // Option 1: Show a snack bar for minor interruptions
-      // AppLoaders.warningSnackBar(
-      //   title: 'No Internet Connection',
-      //   message:
-      //   'You™re offline. Please check your Wi-Fi or mobile data and try again.',
-      // );
-
       // Option 2: Navigate to dedicated no internet screen
       Future.delayed(const Duration(milliseconds: 300), () {
         if (Get.currentRoute != '/NoInternetScreen') {
@@ -53,12 +47,6 @@ class NetworkManager extends GetxController {
                 final connected = await isConnected();
                 if (connected) {
                   Get.back(); // Dismiss the no internet screen
-                } else {
-                  // Get.snackbar(
-                  // title: 'Still Offline',
-                  // message:
-                  // 'Unable to reconnect. Please verify your internet settings.',
-                  // );
                 }
               },
             ),
@@ -66,10 +54,10 @@ class NetworkManager extends GetxController {
         }
       });
     } else {
-      // Optional: Show success message when connection is restored
+      // Show success message when connection is restored
       if (Get.currentRoute == '/NoInternetScreen') {
         Get.back(); // Automatically dismiss the offline screen
-        Get.snackbar('Back Online', 'Your connection has been restored.');
+        CommonToast.success('Your connection has been restored.', title: 'Back Online');
       }
     }
   }
@@ -88,12 +76,9 @@ class NetworkManager extends GetxController {
   Future<bool> checkConnectivityAndShowError() async {
     final connected = await isConnected();
     if (!connected) {
-      Get.snackbar(
-        'No Internet Connection',
+      CommonToast.error(
         'Please check your internet connection and try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Color.fromARGB(255, 249, 43, 43),
-        colorText: Color(0xFFFFFFFF),
+        title: 'No Internet Connection',
       );
     }
     return connected;

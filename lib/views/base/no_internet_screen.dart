@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'custom_snackbar.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 
 class NoInternetScreen extends StatefulWidget {
   final VoidCallback onRetry;
@@ -86,19 +86,13 @@ class _NoInternetScreenState extends State<NoInternetScreen>
         debugPrint('NoInternetScreen: No connection detected');
         // Still no internet, show snackbar using CustomSnackbar
         if (mounted) {
-          showCustomSnackBar(
-            'No internet connection. Please check your network.',
-            isError: true
-          );
+          CommonToast.error('No internet connection. Please check your network.', title: 'No Internet Connection');
         }
       }
     } catch (e) {
       debugPrint('NoInternetScreen: Error checking connection: $e');
       if (mounted) {
-        showCustomSnackBar(
-          'Unable to check connection status',
-          isError: true
-        );
+        CommonToast.error('Unable to check connection status', title: 'Connection Error');
       }
     } finally {
       if (mounted) {

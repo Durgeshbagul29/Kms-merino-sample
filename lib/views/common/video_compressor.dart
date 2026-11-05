@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:kmsmerino/views/base/custom_loader.dart';
-import 'package:kmsmerino/views/base/custom_snackbar.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 
 class VideoCompressor {
   /// Compresses the given video file with a loading indicator.
@@ -13,7 +13,7 @@ class VideoCompressor {
 
     // Size check before compression
     if (!await isSizeValid(videoFile)) {
-      showCustomSnackBar('Video size must be less than 50MB', isError: true);
+      CommonToast.warning('Video size must be less than 50MB', title: 'File Size Limit');
       return null;
     }
 

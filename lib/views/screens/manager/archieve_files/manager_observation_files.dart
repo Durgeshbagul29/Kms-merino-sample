@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:kmsmerino/views/screens/manager/manager_functions.dart';
 import 'package:kmsmerino/views/base/animated_dots_loader.dart';
 import 'package:kmsmerino/views/base/error_message.dart';
@@ -210,9 +211,7 @@ class _ManagerObservationArchieveState extends State<ManagerObservationArchieve>
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not launch file')),
-      );
+      CommonToast.error('Could not launch file', title: 'Download Error');
     }
   }
 }

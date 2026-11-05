@@ -13,6 +13,7 @@ import 'package:kmsmerino/views/screens/auth/loggedin_user.dart';
 import 'package:kmsmerino/views/base/custom_loader.dart';
 import 'package:kmsmerino/views/base/dialog_box_design.dart';
 import 'package:path/path.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 
 class ManagerAddBroadcast extends StatefulWidget {
   const ManagerAddBroadcast({super.key});
@@ -510,12 +511,7 @@ class _ManagerAddBroadcastState extends State<ManagerAddBroadcast>
         debugPrint('Broadcast sent: $respStr');
         if (context.mounted) {
           Navigator.of(context).pop(true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Broadcast sent successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          CommonToast.success('Broadcast sent successfully!');
         }
       } else {
         debugPrint('Broadcast failed (${response.statusCode}): $respStr');

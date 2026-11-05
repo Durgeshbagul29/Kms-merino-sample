@@ -1,3 +1,4 @@
+import '../../utils/common_toast.dart';
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
@@ -189,16 +190,7 @@ class _CommonProfileScreenState extends State<CommonProfileScreen> {
       }
 
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Logout failed. Please try again.'),
-          backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
+      CommonToast.error('Logout failed. Please try again.');
     } catch (e) {
       if (Navigator.canPop(context)) Navigator.pop(context);
       SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -259,15 +251,7 @@ class _CommonProfileScreenState extends State<CommonProfileScreen> {
                       iconColor: primary,
                       label: 'Account Settings',
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Account settings coming soon'),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        );
+                        CommonToast.info('Account settings coming soon', title: 'Coming Soon');
                       },
                       isLast: false,
                     ),
@@ -276,15 +260,7 @@ class _CommonProfileScreenState extends State<CommonProfileScreen> {
                       iconColor: Colors.green.shade600,
                       label: 'Security',
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Security settings coming soon'),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        );
+                        CommonToast.info('Security settings coming soon', title: 'Coming Soon');
                       },
                       isLast: true,
                     ),
@@ -301,15 +277,7 @@ class _CommonProfileScreenState extends State<CommonProfileScreen> {
                       iconColor: Colors.deepPurple.shade400,
                       label: 'Help & Support',
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Help & support coming soon'),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        );
+                        CommonToast.info('Help & support coming soon', title: 'Coming Soon');
                       },
                       isLast: false,
                     ),

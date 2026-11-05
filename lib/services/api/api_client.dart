@@ -14,6 +14,7 @@ import 'package:kmsmerino/controller/auth_controller.dart';
 import 'package:kmsmerino/models/error_response.dart';
 import 'package:kmsmerino/services/api/api_config.dart';
 import 'package:kmsmerino/utils/app_constants.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -315,6 +316,13 @@ class ApiClient extends GetxService {
     }
     debugPrint('====> API Response: [${response0.statusCode}] $uri\n${response0.body}');
     return response0;
+  }
+
+  /// Centralized helper to notify user of API errors using [CommonToast].
+  /// Accurately differentiates 401 (session expired), 403 (forbidden),
+  /// 422 (validation errors), 500+ (server errors), and network errors.
+  static void notifyError(Response response, {String? fallbackMessage}) {
+    CommonToast.handleApiError(response, fallbackMessage: fallbackMessage);
   }
 }
 

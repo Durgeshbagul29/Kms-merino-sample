@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_final_fields
 import 'package:flutter/material.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:intl/intl.dart';
 import 'package:kmsmerino/views/screens/admin/reports/accident_reports.dart';
 import 'package:kmsmerino/views/screens/admin/reports/ethics_reports.dart';
@@ -303,13 +304,7 @@ class _AdminReportFormState extends State<AdminReportForm>
                               // Check if the date range exceeds 1 year
                               DateTime oneYearAfterStart = DateTime(startDate.year + 1, startDate.month, startDate.day);
                               if (picked.isAfter(oneYearAfterStart)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Please select a date range within 1 year'),
-                                    backgroundColor: Colors.red,
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
+                                CommonToast.warning('Please select a date range within 1 year', title: 'Date Range Limit');
                                 return;
                               }
                               setState(() {
@@ -362,24 +357,12 @@ class _AdminReportFormState extends State<AdminReportForm>
                                 int daysDifference = difference.inDays;
                                 
                                 if (daysDifference > 365) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Please select a date range within 1 year'),
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
+                                  CommonToast.warning('Please select a date range within 1 year', title: 'Date Range Limit');
                                   return;
                                 }
                                 
                                 if (endDate.isBefore(startDate)) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('End date cannot be before start date'),
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
+                                  CommonToast.warning('End date cannot be before start date', title: 'Invalid Date Range');
                                   return;
                                 }
                                 

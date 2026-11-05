@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:kmsmerino/views/base/animated_dots_loader.dart';
 import 'package:kmsmerino/views/screens/hr/hr_functions.dart';
+import 'package:kmsmerino/utils/common_toast.dart';
 
 class AssignDepartment extends StatefulWidget {
   final Map<String, dynamic> manager;
@@ -94,35 +95,13 @@ class _AssignDepartmentState extends State<AssignDepartment> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error loading departments: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
+      CommonToast.error('Error loading departments: $e', title: 'Loading Error');
     }
   }
 
   Future<void> _saveAssignments() async {
     if (_selectedDepartmentIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please select at least one department'),
-          backgroundColor: Colors.orange,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
+      CommonToast.warning('Please select at least one department', title: 'Selection Required');
       return;
     }
 
@@ -137,18 +116,7 @@ class _AssignDepartmentState extends State<AssignDepartment> {
       );
 
       if (response['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Departments assigned successfully!'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            margin: EdgeInsets.all(16),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
+        CommonToast.success('Departments assigned successfully!');
         
         // Navigate back to parent screen
         Navigator.pushAndRemoveUntil(
@@ -157,32 +125,10 @@ class _AssignDepartmentState extends State<AssignDepartment> {
           (Route<dynamic> route) => false,
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response['message'] ?? 'Failed to assign departments'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            margin: EdgeInsets.all(16),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
+        CommonToast.error(response['message'] ?? 'Failed to assign departments');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
+      CommonToast.error('Error: $e');
     } finally {
       setState(() {
         _isSaving = false;

@@ -5,6 +5,7 @@ import 'package:kmsmerino/controller/auth_controller.dart';
 import 'package:kmsmerino/models/response_model.dart';
 import 'package:kmsmerino/views/screens/auth/loggedin_user.dart';
 
+import 'package:kmsmerino/utils/common_toast.dart';
 import 'package:kmsmerino/views/base/custom_loader.dart';
 import 'package:kmsmerino/helper/route_helper.dart';
 import 'package:kmsmerino/helper/network_connectivity_manager.dart';
@@ -95,26 +96,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
         if (_lastPressedAt == null ||
             now.difference(_lastPressedAt!) > const Duration(seconds: 2)) {
           _lastPressedAt = now;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                'Double tap to exit app',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              margin: EdgeInsets.only(
-                bottom: screenHeight * 0.05,
-                left: screenWidth * 0.2,
-                right: screenWidth * 0.2,
-              ),
-              backgroundColor: Colors.black.withValues(alpha: 0.8),
-            ),
-          );
+          CommonToast.info('Double tap again to exit app', title: 'Exit KMSMerino', duration: const Duration(seconds: 2));
           return;
         }
 
@@ -457,6 +439,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
                                                           return;
                                                         }
 
+                                                        CommonToast.success('Logged in successfully. Welcome!', title: 'Login Successful');
                                                         CustomLoader.hide();
                                                         await Future.delayed(
                                                           const Duration(
@@ -516,6 +499,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin {
                                                         () => error =
                                                             displayError,
                                                       );
+                                                      CommonToast.error(displayError, title: 'Login Failed');
                                                     }
                                                   }
                                                 },
