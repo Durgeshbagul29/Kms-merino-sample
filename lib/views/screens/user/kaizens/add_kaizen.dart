@@ -37,6 +37,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
   File? _video;
   bool _isPickingImage = false;
   // bool _isPickingVideo = false;
+  final TextEditingController _costController = TextEditingController();
   bool _isSubmitting = false;
   final picker = ImagePicker();
 
@@ -60,6 +61,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _costController.dispose();
     super.dispose();
   }
 
@@ -683,8 +685,9 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: 8),
                     TextFormField(
+                      controller: _costController,
                       textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter the estimated annual savings';
@@ -832,6 +835,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
 
                                   final token = await LoggedInUser.getToken();
                                   final userid = await LoggedInUser.getUserId();
+                                  final String rawCostValue = _costController.text.trim().isNotEmpty ? _costController.text.trim() : kaizenCost.trim();
 
                                   if (_image != null) {
                                     if (!await ImageCompressor.isSizeValid(_image!)) {
@@ -845,14 +849,14 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
                                     }
                                     String ext = extension(_image!.path).toLowerCase();
                                     if (ext == '.jpeg' || ext == '.jpg' || ext == '.png') {
-                                      uploadImage(context, token, userid, problem, description, solution, support, _image, _video, kaizenCost);
+                                      uploadImage(context, token, userid, problem, description, solution, support, _image, _video, rawCostValue);
                                     } else {
                                       CustomLoader.hide();
                                       if (mounted) setState(() => _isSubmitting = false);
                                       dialogBoxForFailure(context, 'Invalid Image Type', 'Valid image types are: jpeg, jpg, png');
                                     }
                                   } else {
-                                    uploadImage(context, token, userid, problem, description, solution, support, _image, _video, kaizenCost);
+                                    uploadImage(context, token, userid, problem, description, solution, support, _image, _video, rawCostValue);
                                   }
                                 }
                               },
@@ -909,7 +913,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
       request.fields['solution'] = soldata;
       request.fields['support'] = supportdata;
       request.fields['type'] = widget.type;
-      request.fields['cost_savings'] = costdata;
+      request.fields['cost_savings'] = costdata.trim();
       request.fields['user_id'] = user.toString();
 
       // Safely attach image with existence check and explicit MIME type
@@ -1393,7 +1397,7 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
       request.fields['solution'] = soldata;
       request.fields['support'] = supportdata;
       request.fields['type'] = widget.type;
-      request.fields['cost_savings'] = costdata;
+      request.fields['cost_savings'] = costdata.trim();
       request.fields['user_id'] = userid.toString();
       request.fields['force_submit'] = 'true';
 

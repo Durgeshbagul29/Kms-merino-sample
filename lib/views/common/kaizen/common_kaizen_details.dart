@@ -263,7 +263,7 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
                   "null")
             _buildDetailItem(
               'Validated Cost Savings',
-              'â‚¹ ${widget.kaizenData['data']['details']['validated_cost_savings']}',
+              '${widget.kaizenData['data']['details']['validated_cost_savings']}',
               icon: Icons.currency_rupee,
             ),
         ],
@@ -530,7 +530,7 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // If rejected â†’ show ONLY reject comment
+        // If rejected †’ show ONLY reject comment
         if (isRejected && hasRejectComment) ...[
           _buildStatusLabel(
             'Reject Comment',
@@ -540,7 +540,7 @@ class _CommonKaizenDetailsState extends State<CommonKaizenDetails>
 
           SizedBox(height: 16),
         ]
-        // If NOT rejected â†’ show all other info
+        // If NOT rejected †’ show all other info
         else if (!isRejected) ...[
           if (details['approve_date'] != null &&
               details['approve_date'] != '') ...[

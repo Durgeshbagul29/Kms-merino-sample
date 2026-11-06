@@ -125,7 +125,7 @@ Future<void> downloadFromUrl(
   String filename,
   String url,
 ) async {
-  // 1ï¸âƒ£ Permission check for Android 10+
+  //  Permission check for Android 10+
   if (Platform.isAndroid) {
     String sdkInt = Platform.version.split('.')[0].split(' ')[0].split('(')[0];
     int sdkVersion = int.tryParse(sdkInt) ?? 0;
@@ -144,7 +144,7 @@ Future<void> downloadFromUrl(
     }
   }
 
-  // 2ï¸âƒ£ Show loader
+  // 2 Show loader
   CustomLoader.show(
     context,
     progressIndicator: CircularProgressIndicator(),
@@ -161,24 +161,26 @@ Future<void> downloadFromUrl(
   );
 
   try {
-    // 3ï¸âƒ£ File path
+    //  File path
     String savePath = await getFilePath(filename);
 
     Dio dio = Dio();
 
-    // 4ï¸âƒ£ Download
+    // 4 Download
     await dio.download(
       url,
       savePath,
       deleteOnError: true,
       onReceiveProgress: (received, total) {
         if (total != -1) {
-          debugPrint("Progress: ${(received / total * 100).toStringAsFixed(0)}%");
+          debugPrint(
+            "Progress: ${(received / total * 100).toStringAsFixed(0)}%",
+          );
         }
       },
     );
 
-    // 5ï¸âƒ£ Success - Open the downloaded file
+    // 5 Success - Open the downloaded file
     CustomLoader.hide();
     dialogBoxForFileDownloadSuccess(
       context,
@@ -189,7 +191,7 @@ Future<void> downloadFromUrl(
     // Optionally open the file after download
     // await OpenFile.open(savePath);
   } catch (e) {
-    // 6ï¸âƒ£ Error handling
+    // 6 Error handling
     CustomLoader.hide();
     dialogBoxForFailure(context, 'Download Failed', 'Please try again');
     if (kDebugMode) {
