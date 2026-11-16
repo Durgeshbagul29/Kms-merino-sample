@@ -48,6 +48,69 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
     return tenantBaseUrl ?? ApiConfig.baseUrl;
   }
 
+  void _logKaizenRequest({
+    required String action,
+    required String url,
+    required Map<String, String> headers,
+    required Map<String, String> fields,
+    File? imageFile,
+    File? videoFile,
+  }) {
+    debugPrint('==================== [$action - REQUEST DATA] ====================');
+    debugPrint('URL: $url');
+    debugPrint('Headers:');
+    headers.forEach((key, value) {
+      if (key.toLowerCase() == 'authorization' && value.length > 25) {
+        debugPrint('  $key: ${value.substring(0, 15)}...${value.substring(value.length - 6)}');
+      } else {
+        debugPrint('  $key: $value');
+      }
+    });
+    debugPrint('Fields:');
+    fields.forEach((key, value) {
+      debugPrint('  $key: $value');
+    });
+    debugPrint('Files:');
+    if (imageFile != null) {
+      final exists = imageFile.existsSync();
+      final size = exists ? '${(imageFile.lengthSync() / 1024).toStringAsFixed(2)} KB' : 'File not found';
+      debugPrint('  image: ${imageFile.path} (Exists: $exists, Size: $size)');
+    } else {
+      debugPrint('  image: None');
+    }
+    if (videoFile != null) {
+      final exists = videoFile.existsSync();
+      final size = exists ? '${(videoFile.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB' : 'File not found';
+      debugPrint('  before_video: ${videoFile.path} (Exists: $exists, Size: $size)');
+    } else {
+      debugPrint('  before_video: None');
+    }
+    debugPrint('==================================================================');
+  }
+
+  void _logKaizenResponse({
+    required String action,
+    required int statusCode,
+    required String responseBody,
+  }) {
+    debugPrint('==================== [$action - RESPONSE] ====================');
+    debugPrint('Status Code: $statusCode');
+    try {
+      final dynamic decoded = json.decode(responseBody);
+      final prettyJson = const JsonEncoder.withIndent('  ').convert(decoded);
+      debugPrint('Response Body (Formatted JSON):');
+      for (final line in prettyJson.split('\n')) {
+        debugPrint(line);
+      }
+    } catch (_) {
+      debugPrint('Response Body (Raw):');
+      for (final line in responseBody.split('\n')) {
+        debugPrint(line);
+      }
+    }
+    debugPrint('==============================================================');
+  }
+
   @override
   void initState() {
     _animationController = AnimationController(
@@ -954,13 +1017,25 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
         }
       }
 
+      _logKaizenRequest(
+        action: 'ADD KAIZEN',
+        url: uri.toString(),
+        headers: request.headers,
+        fields: request.fields,
+        imageFile: imageFile,
+        videoFile: videoFile,
+      );
+
       // Send request with dedicated timeout (45s) for multipart upload
       final streamedResponse = await client.send(request).timeout(const Duration(seconds: 45));
       final response = await http.Response.fromStream(streamedResponse).timeout(const Duration(seconds: 45));
       final respStr = response.body;
 
-      debugPrint("add_kaizen_record statusCode: ${response.statusCode}");
-      debugPrint("add_kaizen_record response: $respStr");
+      _logKaizenResponse(
+        action: 'ADD KAIZEN',
+        statusCode: response.statusCode,
+        responseBody: respStr,
+      );
 
       CustomLoader.hide();
       if (mounted) {
@@ -1437,12 +1512,24 @@ class _AddKaizenState extends State<AddKaizen> with TickerProviderStateMixin {
         }
       }
 
+      _logKaizenRequest(
+        action: 'FORCE SUBMIT KAIZEN',
+        url: uri.toString(),
+        headers: request.headers,
+        fields: request.fields,
+        imageFile: imageFile,
+        videoFile: videoFile,
+      );
+
       final streamedResponse = await client.send(request).timeout(const Duration(seconds: 45));
       final response = await http.Response.fromStream(streamedResponse).timeout(const Duration(seconds: 45));
       final respStr = response.body;
 
-      debugPrint("forceSubmit statusCode: ${response.statusCode}");
-      debugPrint("forceSubmit response: $respStr");
+      _logKaizenResponse(
+        action: 'FORCE SUBMIT KAIZEN',
+        statusCode: response.statusCode,
+        responseBody: respStr,
+      );
 
       CustomLoader.hide();
       if (mounted) {

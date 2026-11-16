@@ -204,39 +204,9 @@ class _UserDetailState extends State<UserDetail> with TickerProviderStateMixin {
                 ),
 
               _buildDetailCard(
-                icon: Icons.confirmation_number_outlined,
-                title: 'Position',
-                value: widget.userArray['position'] ?? '-',
-              ),
-
-              _buildDetailCard(
-                icon: Icons.bloodtype_outlined,
-                title: 'Blood Group',
-                value: widget.userArray['bloodgroup'] ?? '-',
-              ),
-
-              _buildDetailCard(
-                icon: Icons.school_outlined,
-                title: 'Qualification',
-                value: widget.userArray['qualification'] ?? '-',
-              ),
-
-              _buildDetailCard(
-                icon: Icons.work_outline,
-                title: 'Experience',
-                value: widget.userArray['experience'] ?? '-',
-              ),
-
-              _buildDetailCard(
-                icon: Icons.calendar_today_outlined,
-                title: 'Joining Date',
-                value: widget.userArray['joining_date'] ?? '-',
-              ),
-
-              _buildDetailCard(
-                icon: Icons.cake_outlined,
-                title: 'Birth Date',
-                value: widget.userArray['birthdate'] ?? '-',
+                icon: Icons.toggle_on_outlined,
+                title: 'Account Status',
+                value: widget.userArray['status'] == 1 ? 'Active' : 'Inactive',
               ),
             ],
           ),

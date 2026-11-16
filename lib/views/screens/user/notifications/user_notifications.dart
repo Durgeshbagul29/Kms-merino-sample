@@ -21,7 +21,9 @@ class _AdminBroadcastState extends State<UserNotification>
   @override
   void initState() {
     _animationController = AnimationController(
-        vsync: this, duration: const Duration(seconds: 1));
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
     _animationController.repeat(reverse: true);
     tabController = TabController(length: 2, vsync: this);
     super.initState();
@@ -36,9 +38,7 @@ class _AdminBroadcastState extends State<UserNotification>
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-        canPop: true,
-        child: dashboardWidget());
+    return PopScope(canPop: true, child: dashboardWidget());
   }
 
   Widget dashboardWidget() {
@@ -58,93 +58,96 @@ class _AdminBroadcastState extends State<UserNotification>
             ),
           ),
           leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-              onPressed: () => Navigator.pop(context)),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         body: PaddingWidget(
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SizedBox(height: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 16),
 
-            /// Simplified Segmented Control
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          tabController.animateTo(0);
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: tabController.index == 0 
-                            ? Color(0xFF1A73E8) 
-                            : Colors.transparent,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Notifications",
-                            style: TextStyle(
-                              color: tabController.index == 0 
-                                ? Colors.white 
-                                : Colors.grey[700],
-                              fontWeight: tabController.index == 0 
-                                ? FontWeight.bold 
-                                : FontWeight.normal,
-                              fontSize: 16,
+              /// Simplified Segmented Control
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            tabController.animateTo(0);
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: tabController.index == 0
+                                ? Color(0xFF1A73E8)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Notifications",
+                              style: TextStyle(
+                                color: tabController.index == 0
+                                    ? Colors.white
+                                    : Colors.grey[700],
+                                fontWeight: tabController.index == 0
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          tabController.animateTo(1);
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: tabController.index == 1 
-                            ? Color(0xFF1A73E8) 
-                            : Colors.transparent,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Broadcast",
-                            style: TextStyle(
-                              color: tabController.index == 1 
-                                ? Colors.white 
-                                : Colors.grey[700],
-                              fontWeight: tabController.index == 1 
-                                ? FontWeight.bold 
-                                : FontWeight.normal,
-                              fontSize: 16,
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            tabController.animateTo(1);
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: tabController.index == 1
+                                ? Color(0xFF1A73E8)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Broadcast",
+                              style: TextStyle(
+                                color: tabController.index == 1
+                                    ? Colors.white
+                                    : Colors.grey[700],
+                                fontWeight: tabController.index == 1
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            SizedBox(height: 20),
+              SizedBox(height: 20),
 
-            Expanded(
+              Expanded(
                 child: TabBarView(
                   controller: tabController,
                   children: [
@@ -157,7 +160,9 @@ class _AdminBroadcastState extends State<UserNotification>
                         if (snapshot.connectionState == ConnectionState.done) {
                           if (snapshot.hasError) {
                             return errorWidgetDesign(
-                                context, snapshot.error.toString());
+                              context,
+                              snapshot.error.toString(),
+                            );
                           } else if (snapshot.hasData) {
                             dynamic response = snapshot.data;
 
@@ -165,123 +170,161 @@ class _AdminBroadcastState extends State<UserNotification>
                                 response['data'] != null &&
                                 response['data'].length != 0) {
                               return ListView.builder(
-                                  itemCount: response['data'].length,
-                                  padding: EdgeInsets.symmetric(horizontal: 8),
-                                  itemBuilder: (context, index) {
-                                    var item = response['data'][index];
+                                itemCount: response['data'].length,
+                                padding: EdgeInsets.symmetric(horizontal: 8),
+                                itemBuilder: (context, index) {
+                                  var item = response['data'][index];
 
-                                    bool isUnread = item["status"] == 0;
+                                  bool isUnread = item["status"] == 0;
 
-                                    return Container(
-                                      margin: EdgeInsets.only(bottom: 16),
-                                      decoration: BoxDecoration(
-                                        color: isUnread ? Colors.white : Colors.grey[50],
-                                        borderRadius: BorderRadius.circular(16),
-                                        boxShadow: [
-                                          BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.05),
-                                              blurRadius: 6,
-                                              offset: Offset(0, 2))
-                                        ],
-                                        border: Border.all(
-                                          color: isUnread 
-                                            ? Color(0xFF1A73E8).withValues(alpha: 0.3) 
+                                  return Container(
+                                    margin: EdgeInsets.only(bottom: 16),
+                                    decoration: BoxDecoration(
+                                      color: isUnread
+                                          ? Colors.white
+                                          : Colors.grey[50],
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.05,
+                                          ),
+                                          blurRadius: 6,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: isUnread
+                                            ? Color(
+                                                0xFF1A73E8,
+                                              ).withValues(alpha: 0.3)
                                             : Colors.transparent,
-                                          width: 1,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16),
+                                      onTap: () {
+                                        isUnread
+                                            ? reviewSectionNotification(
+                                                context,
+                                                item["id"],
+                                                UserNotification(),
+                                              )
+                                            : viewSectionNotification(
+                                                context,
+                                                item["id"],
+                                                UserNotification(),
+                                              );
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 12,
+                                          horizontal: 12,
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                color: isUnread
+                                                    ? Color(
+                                                        0xFF1A73E8,
+                                                      ).withValues(alpha: 0.15)
+                                                    : Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.notifications_active,
+                                                  color: isUnread
+                                                      ? Color(0xFF1A73E8)
+                                                      : Colors.grey[500],
+                                                  size: 24,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    item["category_id"] == 1
+                                                        ? "${item["category_name"]} - ${item["subcategory_name"]}"
+                                                        : item["category_name"],
+                                                    style: TextStyle(
+                                                      fontWeight: isUnread
+                                                          ? FontWeight.bold
+                                                          : FontWeight.w500,
+                                                      fontSize: 16,
+                                                      color: isUnread
+                                                          ? Colors.black87
+                                                          : Colors.grey[700],
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    "${item["date"]}",
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    "${item["message"]}",
+                                                    style: TextStyle(
+                                                      color: Colors.grey[800],
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Container(
+                                              width: 36,
+                                              height: 36,
+                                              decoration: BoxDecoration(
+                                                color: Colors.red.withValues(
+                                                  alpha: 0.1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: IconButton(
+                                                padding: EdgeInsets.zero,
+                                                icon: Icon(
+                                                  Icons.delete_outline,
+                                                  color: Colors.red,
+                                                  size: 20,
+                                                ),
+                                                onPressed: () =>
+                                                    deleteSectionNotification(
+                                                      context,
+                                                      item["id"],
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      child: ListTile(
-                                        contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                        leading: Container(
-                                          width: 50,
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            color: isUnread 
-                                              ? Color(0xFF1A73E8).withValues(alpha: 0.15) 
-                                              : Colors.grey[200],
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.notifications_active,
-                                              color: isUnread 
-                                                ? Color(0xFF1A73E8) 
-                                                : Colors.grey[500],
-                                              size: 24,
-                                            ),
-                                          ),
-                                        ),
-                                        title: Text(
-                                          item["category_id"] == 1
-                                              ? "${item["category_name"]} - ${item["subcategory_name"]}"
-                                              : item["category_name"],
-                                          style: TextStyle(
-                                            fontWeight: isUnread
-                                                ? FontWeight.bold
-                                                : FontWeight.w500,
-                                            fontSize: 16,
-                                            color: isUnread 
-                                              ? Colors.black87 
-                                              : Colors.grey[700],
-                                          ),
-                                        ),
-                                        subtitle: Padding(
-                                          padding: const EdgeInsets.only(top: 6.0),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text("${item["date"]}",
-                                                  style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 13,
-                                                  )),
-                                              SizedBox(height: 4),
-                                              Text("${item["message"]}",
-                                                  style: TextStyle(
-                                                    color: Colors.grey[800],
-                                                    fontSize: 12,
-                                                  )),
-                                            ],
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          isUnread
-                                              ? reviewSectionNotification(
-                                                  context,
-                                                  item["id"],
-                                                  UserNotification())
-                                              : viewSectionNotification(
-                                                  context,
-                                                  item["id"],
-                                                  UserNotification());
-                                        },
-                                        trailing: Container(
-                                          width: 36,
-                                          height: 36,
-                                          decoration: BoxDecoration(
-                                            color: Colors.red.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: IconButton(
-                                            padding: EdgeInsets.zero,
-                                            icon: Icon(
-                                              Icons.delete_outline,
-                                              color: Colors.red,
-                                              size: 20,
-                                            ),
-                                            onPressed: () =>
-                                                deleteSectionNotification(
-                                                    context, item["id"]),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  });
+                                    ),
+                                  );
+                                },
+                              );
                             } else {
                               return _buildEmptyState(
                                 icon: Icons.notifications_outlined,
                                 title: "No Notifications",
-                                message: "You don't have any notifications at the moment."
+                                message:
+                                    "You don't have any notifications at the moment.",
                               );
                             }
                           }
@@ -299,7 +342,9 @@ class _AdminBroadcastState extends State<UserNotification>
                         if (snapshot.connectionState == ConnectionState.done) {
                           if (snapshot.hasError) {
                             return errorWidgetDesign(
-                                context, snapshot.error.toString());
+                              context,
+                              snapshot.error.toString(),
+                            );
                           } else if (snapshot.hasData) {
                             var responseBr = snapshot.data;
 
@@ -319,54 +364,84 @@ class _AdminBroadcastState extends State<UserNotification>
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
                                         BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.05),
-                                            blurRadius: 6,
-                                            offset: Offset(0, 2))
+                                          color: Colors.black.withValues(
+                                            alpha: 0.05,
+                                          ),
+                                          blurRadius: 6,
+                                          offset: Offset(0, 2),
+                                        ),
                                       ],
                                     ),
-                                    child: ListTile(
-                                      contentPadding: EdgeInsets.all(16),
-                                      leading: Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          color: Colors.orange.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.campaign,
-                                            color: Colors.orange,
-                                            size: 24,
-                                          ),
-                                        ),
-                                      ),
-                                      title: Text(
-                                        br["title"],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      subtitle: Padding(
-                                        padding: const EdgeInsets.only(top: 6.0),
-                                        child: Text(br["message"],
-                                            style: TextStyle(
-                                              color: Colors.grey[700],
-                                              fontSize: 14,
-                                            )),
-                                      ),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16),
                                       onTap: () {
                                         Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => UserBNDetails(
-                                                    br["id"],
-                                                    UserNotification(),
-                                                    broadcastData: br,
-                                                )));
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => UserBNDetails(
+                                              br["id"],
+                                              UserNotification(),
+                                              broadcastData: br,
+                                            ),
+                                          ),
+                                        );
                                       },
+                                      child: Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                color: Colors.orange.withValues(
+                                                  alpha: 0.15,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.campaign,
+                                                  color: Colors.orange,
+                                                  size: 24,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    br["title"],
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 6),
+                                                  Text(
+                                                    br["message"],
+                                                    maxLines: 3,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      color: Colors.grey[700],
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },
@@ -375,7 +450,8 @@ class _AdminBroadcastState extends State<UserNotification>
                               return _buildEmptyState(
                                 icon: Icons.campaign_outlined,
                                 title: "No Broadcasts",
-                                message: "There are no broadcast notifications at the moment."
+                                message:
+                                    "There are no broadcast notifications at the moment.",
                               );
                             }
                           }
@@ -384,8 +460,10 @@ class _AdminBroadcastState extends State<UserNotification>
                       },
                     ),
                   ],
-                ))
-          ]),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -400,11 +478,7 @@ class _AdminBroadcastState extends State<UserNotification>
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
+          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2)),
         ],
       ),
       child: Center(
@@ -417,7 +491,11 @@ class _AdminBroadcastState extends State<UserNotification>
   }
 
   /// Empty state widget for when there are no notifications
-  Widget _buildEmptyState({required IconData icon, required String title, required String message}) {
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String message,
+  }) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -432,11 +510,7 @@ class _AdminBroadcastState extends State<UserNotification>
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(
-                child: Icon(
-                  icon,
-                  size: 40,
-                  color: Colors.grey[400],
-                ),
+                child: Icon(icon, size: 40, color: Colors.grey[400]),
               ),
             ),
             SizedBox(height: 24),
@@ -452,10 +526,7 @@ class _AdminBroadcastState extends State<UserNotification>
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 15, color: Colors.grey[600]),
             ),
           ],
         ),

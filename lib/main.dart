@@ -110,6 +110,7 @@ class MyApp extends StatelessWidget {
       title: AppConstants.APP_NAME,
       debugShowCheckedModeBanner: false,
       navigatorKey: Get.key,
+      navigatorObservers: [routeObserver],
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
       ),

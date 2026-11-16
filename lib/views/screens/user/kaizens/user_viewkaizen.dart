@@ -126,21 +126,20 @@ class _UserViewKaizensState extends State<UserViewKaizens> {
                         );
                       } else if (snapshot.hasData) {
                         dynamic response = snapshot.data;
-                        if (response['success'] == true && response['data'] != null) {
+                        if (response['success'] == true &&
+                            response['data'] != null) {
                           var kaizensList = response['data']['kaizens'];
                           if (kaizensList != null && kaizensList.length > 0) {
                             return SizedBox(
-                                height: MediaQuery.of(
-                                  context,
-                                ).size.height,
-                                child: ListView.builder(
-                                  itemCount: kaizensList.length,
-                                  itemBuilder: (context, index) {
-                                    dynamic kaizen = kaizensList[index];
-                                    return _buildKaizenListItem(kaizen);
-                                  },
-                                ),
-                              );
+                              height: MediaQuery.of(context).size.height,
+                              child: ListView.builder(
+                                itemCount: kaizensList.length,
+                                itemBuilder: (context, index) {
+                                  dynamic kaizen = kaizensList[index];
+                                  return _buildKaizenListItem(kaizen);
+                                },
+                              ),
+                            );
                           } else {
                             // Show custom no data widget when kaizens list is empty
                             return KaizenNoDataWidget(type: widget.type);
@@ -159,8 +158,6 @@ class _UserViewKaizensState extends State<UserViewKaizens> {
       ),
     );
   }
-
-
 
   // Build category menu similar to user profile
   Widget _buildCategoryMenu() {
@@ -453,7 +450,8 @@ class _UserViewKaizensState extends State<UserViewKaizens> {
                       } else if (value == 2 &&
                           ((kaizen['status'] == 0) ||
                               (kaizen['status'] == 1 &&
-                                  (kaizen['end'] == 0 || kaizen['start'] == 1) &&
+                                  (kaizen['end'] == 0 ||
+                                      kaizen['start'] == 1) &&
                                   kaizen['k_status'] == 0))) {
                         if (kaizen['status'] == 0) {
                           getUserKaizenDetailsForPendingUpdate(

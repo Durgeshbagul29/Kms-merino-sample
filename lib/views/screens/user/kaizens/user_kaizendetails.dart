@@ -45,7 +45,8 @@ class _BNDetailsState extends State<UserKaizenDetails> {
             tooltip: 'Export to PDF',
             onPressed: () async {
               final networkManager = NetworkManager.instance;
-              final isConnected = await networkManager.checkConnectivityAndShowError();
+              final isConnected = await networkManager
+                  .checkConnectivityAndShowError();
               if (!isConnected) return;
               generateKaizenPDF(context, widget.id);
             },

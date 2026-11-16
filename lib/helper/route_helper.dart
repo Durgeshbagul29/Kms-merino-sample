@@ -9,6 +9,8 @@ import 'package:kmsmerino/views/screens/user/user_bottom_navigation.dart';
 import 'package:kmsmerino/views/screens/hr/hr_bottom_navigation.dart';
 import 'package:kmsmerino/views/screens/admin/admin_bottom_navigation.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 class RouteHelper {
   static const String initial = '/';
   static const String splash = '/splash';

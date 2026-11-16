@@ -19,6 +19,8 @@ class UserBottomNavigation extends StatefulWidget {
 
 class UserBottomNavigationState extends State<UserBottomNavigation> {
   int _currentIndex = 0;
+  int get currentIndex => _currentIndex;
+  final GlobalKey<ComplaintsState> _complaintsKey = GlobalKey<ComplaintsState>();
   List<Widget> _pages = [];
 
   @override
@@ -31,7 +33,7 @@ class UserBottomNavigationState extends State<UserBottomNavigation> {
   void _loadPages() {
     _pages = [
       const UserDashboard(),
-      const Complaints(),
+      Complaints(key: _complaintsKey),
       CommonProfileScreen(role: 'User', title: 'User Profile'),
     ];
   }
@@ -40,12 +42,18 @@ class UserBottomNavigationState extends State<UserBottomNavigation> {
     setState(() {
       _currentIndex = index;
     });
+    if (index == 1) {
+      _complaintsKey.currentState?.fetchComplaints();
+    }
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
     });
+    if (index == 1) {
+      _complaintsKey.currentState?.fetchComplaints();
+    }
   }
 
   @override

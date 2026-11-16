@@ -1,25 +1,34 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:kmsmerino/helper/route_helper.dart';
 import 'package:kmsmerino/views/base/error_message.dart';
 import 'package:kmsmerino/views/common/safety/empty_state_widget.dart';
 import 'package:kmsmerino/views/screens/user/ethics/add_complaint.dart';
 import 'package:kmsmerino/views/common/ethics/ethics_complaint_details.dart';
+import 'package:kmsmerino/views/screens/user/user_bottom_navigation.dart';
 import 'package:kmsmerino/views/screens/user/user_functions.dart';
 
 class Complaints extends StatefulWidget {
   const Complaints({super.key});
 
   @override
-  State<Complaints> createState() => _ComplaintsState();
+  State<Complaints> createState() => ComplaintsState();
 }
 
-class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
+class ComplaintsState extends State<Complaints>
+    with TickerProviderStateMixin, RouteAware, WidgetsBindingObserver {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  Future<dynamic>? _complaintsFuture;
+  DateTime? _lastFetchTime;
+  bool _isRouteSubscribed = false;
 
   @override
   void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -28,18 +37,108 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
-    // Start animation after a small delay
-    Future.delayed(Duration(milliseconds: 100), () {
-      _animationController.forward();
-    });
+    // Initial fetch of complaints
+    fetchComplaints(force: true);
+  }
 
-    super.initState();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isRouteSubscribed) {
+      final modalRoute = ModalRoute.of(context);
+      if (modalRoute != null) {
+        routeObserver.subscribe(this, modalRoute);
+        _isRouteSubscribed = true;
+      }
+    }
   }
 
   @override
   void dispose() {
+    if (_isRouteSubscribed) {
+      routeObserver.unsubscribe(this);
+    }
+    WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when a screen pushed on top is popped and this screen becomes visible again
+    fetchComplaints();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _isCurrentTab()) {
+      fetchComplaints();
+    }
+  }
+
+  bool _isCurrentTab() {
+    final nav = UserBottomNavigation.of(context);
+    if (nav != null) {
+      return nav.currentIndex == 1;
+    }
+    return true;
+  }
+
+  /// Fetches complaints API data. Debounced to avoid duplicate rapid calls.
+  void fetchComplaints({bool force = false}) {
+    final now = DateTime.now();
+    if (!force &&
+        _lastFetchTime != null &&
+        now.difference(_lastFetchTime!) < const Duration(milliseconds: 500)) {
+      return;
+    }
+    _lastFetchTime = now;
+
+    if (mounted) {
+      setState(() {
+        _complaintsFuture = getUserComplaints();
+      });
+      _animationController.forward(from: 0.0);
+    }
+  }
+
+  /// Pull-to-refresh handler that awaits API completion
+  Future<void> refresh() async {
+    final future = getUserComplaints();
+    if (mounted) {
+      setState(() {
+        _complaintsFuture = future;
+      });
+    }
+    try {
+      await future;
+    } finally {
+      if (mounted) {
+        _animationController.forward(from: 0.0);
+      }
+    }
+  }
+
+  Future<void> _navigateToAddComplaint() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddComplaint()),
+    );
+    if (mounted) {
+      fetchComplaints(force: true);
+    }
+  }
+
+  Future<void> _navigateToDetails(Map data) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EthicsComplaintDetails(complaint: data),
+      ),
+    );
+    if (mounted) {
+      fetchComplaints();
+    }
   }
 
   @override
@@ -73,12 +172,7 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddComplaint()),
-            );
-          },
+          onPressed: _navigateToAddComplaint,
           label: Text(
             'New Complaint',
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -87,73 +181,65 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
           backgroundColor: Theme.of(context).primaryColor,
         ),
         body: FutureBuilder<dynamic>(
-          future: getUserComplaints(),
+          future: _complaintsFuture,
           builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasError) {
                 debugPrint(snapshot.error.toString());
-                return errorWidgetDesign(context, snapshot.error.toString());
+                return _buildErrorState(snapshot.error.toString());
               } else if (snapshot.hasData) {
                 dynamic response = snapshot.data;
-                if (response['success'] == true && response['data'] != null) {
+                if (response is Map &&
+                    response['success'] == true &&
+                    response['data'] != null) {
+                  final List items = response['data'] is List ? response['data'] : [];
                   // Check if data array is empty
-                  if (response['data'].isEmpty) {
-                    return EmptyStateWidget(
-                      heading: 'No Complaints Found',
-                      subHeading:
-                          'You haven\'t submitted any ethics complaints yet.\nTap the + button to add a new complaint.',
-                      icon: Icons.gavel_outlined,
-                      iconColor: Theme.of(context).primaryColor,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).primaryColor.withValues(alpha: 0.1),
-                    );
+                  if (items.isEmpty) {
+                    return _buildEmptyState();
                   }
 
-                  // Data is not empty, show the list
+                  // Data is not empty, show the list with RefreshIndicator
                   return RefreshIndicator(
-                    onRefresh: () async {
-                      setState(() {});
-                    },
+                    onRefresh: refresh,
                     child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.symmetric(
                         vertical: 16,
                         horizontal: 16,
                       ),
-                      itemCount: response['data'].length,
+                      itemCount: items.length,
                       itemBuilder: (context, index) {
-                        dynamic complaint = response['data'][index];
+                        dynamic complaint = items[index];
                         return SlideTransition(
-                          position:
-                              Tween<Offset>(
-                                begin: Offset(1.0, 0),
-                                end: Offset(0, 0),
-                              ).animate(
-                                CurvedAnimation(
-                                  parent: _animationController,
-                                  curve: Interval(
-                                    (1.0 / response['data'].length) * index,
-                                    1.0,
-                                    curve: Curves.easeOut,
-                                  ),
-                                ),
+                          position: Tween<Offset>(
+                            begin: Offset(1.0, 0),
+                            end: Offset(0, 0),
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                (1.0 / items.length) * index,
+                                1.0,
+                                curve: Curves.easeOut,
                               ),
+                            ),
+                          ),
                           child: _buildComplaintCard(
                             context,
                             complaint["date"],
                             complaint["complaint"],
                             complaint['status'],
-                            complaint,
+                            complaint is Map ? complaint : {},
                           ),
                         );
                       },
                     ),
                   );
                 } else {
-                  return errorWidgetDesign(
-                    context,
-                    'Failed to load complaints',
-                  );
+                  final msg = (response is Map && response['message'] != null)
+                      ? response['message'].toString()
+                      : 'Failed to load complaints';
+                  return _buildErrorState(msg);
                 }
               }
             }
@@ -188,13 +274,85 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildEmptyState() {
+    return RefreshIndicator(
+      onRefresh: refresh,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: EmptyStateWidget(
+              heading: 'No Complaints Found',
+              subHeading:
+                  'You haven\'t submitted any ethics complaints yet.\nTap the + button to add a new complaint.',
+              icon: Icons.gavel_outlined,
+              iconColor: Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(
+                context,
+              ).primaryColor.withValues(alpha: 0.1),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return RefreshIndicator(
+      onRefresh: refresh,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    errorWidgetDesign(context, message),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => fetchComplaints(force: true),
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      label: const Text(
+                        'Retry',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildComplaintCard(
     BuildContext context,
-    String date,
-    String complaint,
-    int status,
+    dynamic date,
+    dynamic complaint,
+    dynamic status,
     Map data,
   ) {
+    final dateStr = (date ?? '').toString();
+    final complaintStr = (complaint ?? '').toString();
+    final statusInt = int.tryParse(status?.toString() ?? '0') ?? 0;
+
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -211,14 +369,7 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EthicsComplaintDetails(complaint: data),
-              ),
-            );
-          },
+          onTap: () => _navigateToDetails(data),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -260,7 +411,7 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  date,
+                                  dateStr,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -272,7 +423,7 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
-                    _buildStatusBadge(status),
+                    _buildStatusBadge(statusInt),
                   ],
                 ),
               ),
@@ -280,7 +431,7 @@ class _ComplaintsState extends State<Complaints> with TickerProviderStateMixin {
               Padding(
                 padding: EdgeInsets.all(16),
                 child: Text(
-                  complaint,
+                  complaintStr,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[700],

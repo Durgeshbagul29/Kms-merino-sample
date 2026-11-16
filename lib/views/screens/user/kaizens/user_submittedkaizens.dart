@@ -38,10 +38,7 @@ class _AccidentState extends State<UserSubmittedKaizens>
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-        canPop: true,
-        child: dashboardWidget(),
-    );
+    return PopScope(canPop: true, child: dashboardWidget());
   }
 
   Widget dashboardWidget() {
@@ -76,7 +73,9 @@ class _AccidentState extends State<UserSubmittedKaizens>
                 } else if (snapshot.hasData) {
                   dynamic response = snapshot.data;
                   return response['success'] == true
-                      ? response['data'] != null && response['data']['kaizens'] != null && response['data']['kaizens'].length > 0
+                      ? response['data'] != null &&
+                                response['data']['kaizens'] != null &&
+                                response['data']['kaizens'].length > 0
                             ? ListView.builder(
                                 itemCount: response['data']['kaizens'].length,
                                 shrinkWrap: true,
@@ -103,7 +102,7 @@ class _AccidentState extends State<UserSubmittedKaizens>
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
